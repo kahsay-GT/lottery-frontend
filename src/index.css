@@ -1,0 +1,507 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   THEME TOKENS  (dark = default, light applied when <html class="light">)
+───────────────────────────────────────────────────────────────────────────── */
+:root {
+  /* backgrounds */
+  --bg-page:       #08090f;
+  --bg-sidebar:    #0d0e1a;
+  --bg-nav:        rgba(10,11,20,0.82);
+  --bg-nav-scroll: rgba(10,11,20,0.95);
+
+  /* surfaces */
+  --surface:       rgba(255,255,255,0.035);
+  --surface-2:     rgba(255,255,255,0.055);
+  --surface-3:     rgba(255,255,255,0.08);
+  --surface-hover: rgba(255,255,255,0.06);
+
+  /* glass */
+  --glass-bg:      rgba(255,255,255,0.04);
+  --glass-border:  rgba(255,255,255,0.07);
+
+  /* borders */
+  --border:        rgba(255,255,255,0.08);
+  --border-strong: rgba(255,255,255,0.12);
+
+  /* text */
+  --text-primary:  #e2e4ea;
+  --text-secondary:#c8cad8;
+  --text-muted:    #6b7280;
+  --text-faint:    #9ca3af;
+
+  /* inputs */
+  --input-bg:      rgba(255,255,255,0.05);
+  --input-border:  rgba(255,255,255,0.10);
+
+  /* table */
+  --table-head-bg: rgba(255,255,255,0.02);
+  --table-row-hover: rgba(255,255,255,0.025);
+  --table-divider: rgba(255,255,255,0.04);
+
+  /* scrollbar */
+  --scrollbar-thumb:       rgba(255,255,255,0.12);
+  --scrollbar-thumb-hover: rgba(255,255,255,0.22);
+
+  /* select dropdown */
+  --select-bg:     #1a1d2e;
+  --select-color:  #e2e4ea;
+}
+
+/* ── Light theme overrides ───────────────────────────────────────────────── */
+html.light {
+  --bg-page:       #f3f4f8;
+  --bg-sidebar:    #ffffff;
+  --bg-nav:        rgba(255,255,255,0.85);
+  --bg-nav-scroll: rgba(255,255,255,0.97);
+
+  --surface:       rgba(0,0,0,0.03);
+  --surface-2:     rgba(0,0,0,0.05);
+  --surface-3:     rgba(0,0,0,0.08);
+  --surface-hover: rgba(0,0,0,0.05);
+
+  --glass-bg:      rgba(255,255,255,0.7);
+  --glass-border:  rgba(0,0,0,0.08);
+
+  --border:        rgba(0,0,0,0.1);
+  --border-strong: rgba(0,0,0,0.16);
+
+  --text-primary:  #111827;
+  --text-secondary:#374151;
+  --text-muted:    #4b5563;
+  --text-faint:    #6b7280;
+
+  --input-bg:      rgba(0,0,0,0.04);
+  --input-border:  rgba(0,0,0,0.14);
+
+  --table-head-bg: rgba(0,0,0,0.025);
+  --table-row-hover: rgba(0,0,0,0.03);
+  --table-divider: rgba(0,0,0,0.06);
+
+  --scrollbar-thumb:       rgba(0,0,0,0.15);
+  --scrollbar-thumb-hover: rgba(0,0,0,0.28);
+
+  --select-bg:     #ffffff;
+  --select-color:  #111827;
+}
+
+@layer base {
+  *, *::before, *::after { box-sizing: border-box; }
+  html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: var(--bg-page);
+    color: var(--text-primary);
+    margin: 0;
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 99px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--scrollbar-thumb-hover); }
+  input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
+  select option { background: var(--select-bg); color: var(--select-color); }
+}
+
+@layer components {
+
+  /* ── Surface layers ──────────────────────────────────────── */
+  .surface   { background: var(--surface); }
+  .surface-2 { background: var(--surface-2); }
+  .surface-3 { background: var(--surface-3); }
+
+  /* ── Glass card ──────────────────────────────────────────── */
+  .glass-card {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+  }
+  .glass-card-sm {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+  }
+  .glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+  }
+
+  /* ── Buttons ─────────────────────────────────────────────── */
+  .btn-primary {
+    display: inline-flex; align-items: center; justify-content: center;
+    gap: 6px; font-size: 13.5px; font-weight: 600; line-height: 1;
+    padding: 9px 18px; border-radius: 10px; cursor: pointer;
+    background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+    color: #fff; border: 1px solid rgba(99,102,241,0.4);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08);
+    transition: all 0.15s ease; text-decoration: none;
+  }
+  .btn-primary:hover:not(:disabled) {
+    background: linear-gradient(135deg, #4338ca 0%, #4f46e5 100%);
+    box-shadow: 0 4px 16px rgba(99,102,241,0.35);
+    transform: translateY(-1px);
+  }
+  .btn-primary:active:not(:disabled) { transform: translateY(0); }
+  .btn-primary:disabled { opacity: 0.45; cursor: not-allowed; }
+
+  .btn-secondary {
+    display: inline-flex; align-items: center; justify-content: center;
+    gap: 6px; font-size: 13.5px; font-weight: 500; line-height: 1;
+    padding: 9px 16px; border-radius: 10px; cursor: pointer;
+    background: var(--surface-2); color: var(--text-secondary);
+    border: 1px solid var(--border-strong);
+    transition: all 0.15s ease; text-decoration: none;
+  }
+  .btn-secondary:hover:not(:disabled) {
+    background: var(--surface-3); color: var(--text-primary);
+    border-color: var(--border-strong);
+  }
+  .btn-secondary:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .btn-danger {
+    display: inline-flex; align-items: center; justify-content: center;
+    gap: 6px; font-size: 13.5px; font-weight: 600; line-height: 1;
+    padding: 9px 16px; border-radius: 10px; cursor: pointer;
+    background: rgba(239,68,68,0.15); color: #f87171;
+    border: 1px solid rgba(239,68,68,0.25);
+    transition: all 0.15s ease;
+  }
+  .btn-danger:hover:not(:disabled) {
+    background: rgba(239,68,68,0.25); border-color: rgba(239,68,68,0.4);
+  }
+  .btn-danger:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .btn-ghost {
+    display: inline-flex; align-items: center; justify-content: center;
+    gap: 6px; font-size: 13px; font-weight: 500; line-height: 1;
+    padding: 7px 12px; border-radius: 8px; cursor: pointer;
+    background: transparent; color: var(--text-faint); border: none;
+    transition: all 0.15s ease;
+  }
+  .btn-ghost:hover { background: var(--surface-hover); color: var(--text-primary); }
+
+  .btn-icon {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 32px; height: 32px; border-radius: 8px; cursor: pointer;
+    background: transparent; border: none; color: var(--text-faint);
+    transition: all 0.15s ease; flex-shrink: 0;
+  }
+  .btn-icon:hover { background: var(--surface-hover); color: var(--text-primary); }
+
+  /* ── Inputs ──────────────────────────────────────────────── */
+  .input-dark {
+    width: 100%; height: 38px; padding: 0 12px;
+    font-size: 13.5px; font-family: inherit; color: var(--text-primary);
+    background: var(--input-bg); border-radius: 10px;
+    border: 1px solid var(--input-border);
+    outline: none; transition: all 0.15s ease;
+  }
+  .input-dark::placeholder { color: rgba(156,163,175,0.6); }
+  html.light .input-dark::placeholder { color: rgba(75,85,99,0.7); }
+  .input-dark:focus {
+    border-color: rgba(99,102,241,0.6);
+    background: rgba(99,102,241,0.06);
+    box-shadow: 0 0 0 3px rgba(99,102,241,0.12);
+  }
+  .input-dark:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  textarea.input-dark {
+    height: auto; min-height: 80px;
+    padding: 10px 12px; resize: vertical; line-height: 1.5;
+  }
+  select.input-dark { cursor: pointer; }
+
+  .label {
+    display: block; font-size: 11.5px; font-weight: 600;
+    color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.07em;
+    margin-bottom: 6px;
+  }
+
+  /* ── Table — completely borderless pro style ─────────────── */
+  .pro-table {
+    width: 100%; border-collapse: collapse;
+  }
+  .pro-table thead tr {
+    border-bottom: 1px solid var(--border);
+  }
+  .pro-table thead th {
+    padding: 11px 16px; text-align: left;
+    font-size: 11px; font-weight: 700; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 0.08em;
+    white-space: nowrap; background: var(--table-head-bg);
+  }
+  .pro-table tbody tr {
+    transition: background 0.12s ease;
+  }
+  .pro-table tbody tr:hover {
+    background: var(--table-row-hover);
+  }
+  .pro-table tbody td {
+    padding: 13px 16px; font-size: 13.5px; color: var(--text-secondary);
+    border-bottom: 1px solid var(--table-divider);
+    vertical-align: middle;
+  }
+  .pro-table tbody tr:last-child td { border-bottom: none; }
+
+  /* ── Stat card ───────────────────────────────────────────── */
+  .stat-card {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px; padding: 20px;
+    display: flex; align-items: center; gap: 16px;
+  }
+
+  /* ── Sidebar ─────────────────────────────────────────────── */
+  .sidebar-link {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 12px; border-radius: 10px;
+    font-size: 13.5px; font-weight: 500; color: var(--text-muted);
+    cursor: pointer; transition: all 0.12s ease;
+    text-decoration: none;
+  }
+  .sidebar-link:hover { background: var(--surface-hover); color: var(--text-secondary); }
+  .sidebar-link-active {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 12px; border-radius: 10px;
+    font-size: 13.5px; font-weight: 600; color: var(--text-primary);
+    background: rgba(99,102,241,0.18);
+    border: 1px solid rgba(99,102,241,0.2);
+    text-decoration: none;
+  }
+
+  /* ── Badges ──────────────────────────────────────────────── */
+  .badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 8px; border-radius: 6px;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.04em;
+    text-transform: uppercase; white-space: nowrap;
+  }
+
+  /* ── Misc ────────────────────────────────────────────────── */
+  .page-title {
+    font-size: 22px; font-weight: 800; color: var(--text-primary);
+    letter-spacing: -0.02em; display: flex; align-items: center; gap: 8px;
+  }
+  .section-title {
+    font-size: 11px; font-weight: 700; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 0.09em;
+  }
+  .divider { border: none; border-top: 1px solid var(--border); }
+
+  /* ── Animations ──────────────────────────────────────────── */
+  .animate-fade-in  { animation: fadeIn  0.2s ease-out; }
+  .animate-slide-up { animation: slideUp 0.25s ease-out; }
+}
+
+@keyframes fadeIn  { from { opacity: 0 } to { opacity: 1 } }
+@keyframes slideUp { from { opacity: 0; transform: translateY(12px) } to { opacity: 1; transform: translateY(0) } }
+@keyframes spin    { from { transform: rotate(0deg) } to { transform: rotate(360deg) } }
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   LIGHT MODE — override hardcoded inline styles in public pages
+   Pages set background / color as inline styles so we use !important + filter
+───────────────────────────────────────────────────────────────────────────── */
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   LIGHT MODE — override hardcoded inline styles in public pages
+   React renders hex colors as rgb() in the DOM style attribute, so we target
+   both forms. We also inject overrides via the ThemeContext effect.
+───────────────────────────────────────────────────────────────────────────── */
+
+/* 1. Page wrappers — #08090f = rgb(8,9,15), #0d0e1a = rgb(13,14,26) */
+html.light [style*="background: rgb(8, 9, 15)"],
+html.light [style*="background: rgba(8, 9, 15"],
+html.light [style*="background-color: rgb(8, 9, 15)"] {
+  background: var(--bg-page) !important;
+}
+html.light [style*="background: rgb(13, 14, 26)"],
+html.light [style*="background-color: rgb(13, 14, 26)"] {
+  background: var(--bg-sidebar) !important;
+}
+
+/* 2. Card surfaces — rgba(255,255,255,0.04) and similar */
+html.light [style*="background: rgba(255, 255, 255, 0.04)"],
+html.light [style*="background: rgba(255,255,255,0.04)"] {
+  background: rgba(0,0,0,0.04) !important;
+}
+html.light [style*="background: rgba(255, 255, 255, 0.035)"],
+html.light [style*="background: rgba(255,255,255,0.035)"] {
+  background: rgba(0,0,0,0.03) !important;
+}
+html.light [style*="background: rgba(255, 255, 255, 0.055)"],
+html.light [style*="background: rgba(255,255,255,0.055)"] {
+  background: rgba(0,0,0,0.045) !important;
+}
+html.light [style*="background: rgba(255, 255, 255, 0.06)"],
+html.light [style*="background: rgba(255,255,255,0.06)"] {
+  background: rgba(0,0,0,0.05) !important;
+}
+html.light [style*="background: rgba(255, 255, 255, 0.07)"],
+html.light [style*="background: rgba(255,255,255,0.07)"] {
+  background: rgba(0,0,0,0.06) !important;
+}
+html.light [style*="background: rgba(255, 255, 255, 0.08)"],
+html.light [style*="background: rgba(255,255,255,0.08)"] {
+  background: rgba(0,0,0,0.06) !important;
+}
+html.light [style*="background: rgba(255, 255, 255, 0.03)"],
+html.light [style*="background: rgba(255,255,255,0.03)"] {
+  background: rgba(0,0,0,0.025) !important;
+}
+html.light [style*="background: rgba(255, 255, 255, 0.05)"],
+html.light [style*="background: rgba(255,255,255,0.05)"] {
+  background: rgba(0,0,0,0.04) !important;
+}
+
+/* 3. Inner "dark stat box" rgba(0,0,0,0.2) */
+html.light [style*="background: rgba(0, 0, 0, 0.2)"],
+html.light [style*="background: rgba(0,0,0,0.2)"] {
+  background: rgba(0,0,0,0.05) !important;
+}
+
+/* 4. Hardcoded white / near-white text — scope to text elements only */
+html.light p[style*="color: rgb(255, 255, 255)"],
+html.light span[style*="color: rgb(255, 255, 255)"],
+html.light h1[style*="color: rgb(255, 255, 255)"],
+html.light h2[style*="color: rgb(255, 255, 255)"],
+html.light h3[style*="color: rgb(255, 255, 255)"] {
+  color: var(--text-primary) !important;
+}
+html.light p[style*="color: rgb(243, 244, 246)"],
+html.light span[style*="color: rgb(243, 244, 246)"],
+html.light h1[style*="color: rgb(243, 244, 246)"],
+html.light h2[style*="color: rgb(243, 244, 246)"],
+html.light h3[style*="color: rgb(243, 244, 246)"] { /* #f3f4f6 */
+  color: var(--text-primary) !important;
+}
+html.light p[style*="color: rgb(226, 228, 234)"],
+html.light span[style*="color: rgb(226, 228, 234)"] { /* #e2e4ea */
+  color: var(--text-secondary) !important;
+}
+html.light p[style*="color: rgb(200, 202, 216)"],
+html.light span[style*="color: rgb(200, 202, 216)"] { /* #c8cad8 */
+  color: var(--text-secondary) !important;
+}
+html.light p[style*="color: rgb(156, 163, 175)"],
+html.light span[style*="color: rgb(156, 163, 175)"],
+html.light a[style*="color: rgb(156, 163, 175)"] { /* #9ca3af — was too light */
+  color: #6b7280 !important;
+}
+
+/* #6b7280 = rgb(107,114,128) — also too light on white, push darker */
+html.light p[style*="color: rgb(107, 114, 128)"],
+html.light span[style*="color: rgb(107, 114, 128)"],
+html.light a[style*="color: rgb(107, 114, 128)"],
+html.light h2[style*="color: rgb(107, 114, 128)"],
+html.light h3[style*="color: rgb(107, 114, 128)"] {
+  color: #4b5563 !important;
+}
+
+/* #4b5563 = rgb(75,85,99) — footer tiny text, push to readable */
+html.light p[style*="color: rgb(75, 85, 99)"],
+html.light span[style*="color: rgb(75, 85, 99)"] {
+  color: #374151 !important;
+}
+
+/* 5. Borders */
+html.light [style*="border: 1px solid rgba(255, 255, 255, 0.08)"],
+html.light [style*="border: 1px solid rgba(255,255,255,0.08)"] {
+  border-color: rgba(0,0,0,0.1) !important;
+}
+html.light [style*="border: 1px solid rgba(255, 255, 255, 0.06)"],
+html.light [style*="border: 1px solid rgba(255,255,255,0.06)"] {
+  border-color: rgba(0,0,0,0.07) !important;
+}
+html.light [style*="border: 1px solid rgba(255, 255, 255, 0.1)"],
+html.light [style*="border: 1px solid rgba(255,255,255,0.1)"] {
+  border-color: rgba(0,0,0,0.12) !important;
+}
+html.light [style*="border: 1px solid rgba(255, 255, 255, 0.07)"],
+html.light [style*="border: 1px solid rgba(255,255,255,0.07)"] {
+  border-color: rgba(0,0,0,0.08) !important;
+}
+html.light [style*="border: 1px solid rgba(255, 255, 255, 0.09)"],
+html.light [style*="border: 1px solid rgba(255,255,255,0.09)"] {
+  border-color: rgba(0,0,0,0.09) !important;
+}
+html.light [style*="border-top: 1px solid rgba(255, 255, 255, 0.06)"],
+html.light [style*="border-top: 1px solid rgba(255,255,255,0.06)"] {
+  border-top-color: rgba(0,0,0,0.07) !important;
+}
+html.light [style*="border-bottom: 1px solid rgba(255, 255, 255, 0.07)"],
+html.light [style*="border-bottom: 1px solid rgba(255,255,255,0.07)"] {
+  border-bottom-color: rgba(0,0,0,0.08) !important;
+}
+html.light [style*="border-right: 1px solid rgba(255, 255, 255, 0.06)"],
+html.light [style*="border-right: 1px solid rgba(255,255,255,0.06)"] {
+  border-right-color: rgba(0,0,0,0.07) !important;
+}
+
+/* 6. Smooth transitions on all elements when theme switches */
+html.light * {
+  transition: background 0.2s ease, background-color 0.2s ease,
+              color 0.2s ease, border-color 0.2s ease;
+}
+
+/* ── Responsive visibility helpers ───────────────────────────── */
+@media (min-width: 768px) {
+  .mobile-only  { display: none !important; }
+  .desktop-only { display: flex !important; }
+}
+@media (max-width: 767px) {
+  .mobile-only  { display: flex !important; }
+  .desktop-only { display: none !important; }
+  .page-title { font-size: 18px !important; }
+}
+
+/* ── Mobile-first public buyer pages ────────────────────────── */
+
+/* Tap targets never smaller than 44 px on mobile */
+@media (max-width: 767px) {
+  .btn-primary, .btn-secondary {
+    min-height: 48px;
+    font-size: 15px;
+    padding: 12px 20px;
+    border-radius: 14px;
+  }
+  .input-dark {
+    height: 48px;
+    font-size: 16px;   /* prevent iOS auto-zoom on focus */
+    border-radius: 12px;
+  }
+  textarea.input-dark { min-height: 96px; }
+
+  /* card image height on small screens */
+  .card-image-area { height: 200px !important; }
+
+  /* hero stats grid — 2 cols on phone */
+  .hero-stats { grid-template-columns: 1fr 1fr !important; }
+
+  /* purchase flow: single column on phone */
+  .buy-grid { grid-template-columns: 1fr !important; }
+
+  /* payment step 2 amount+ref stacks vertically */
+  .payment-amounts { grid-template-columns: 1fr !important; }
+
+  /* summary grid — 1 col on phone */
+  .done-summary { grid-template-columns: 1fr 1fr !important; }
+
+  /* prize list slightly tighter */
+  .prize-row { padding: 10px 12px !important; }
+
+  /* lottery listing cards: single column */
+  .lottery-grid { grid-template-columns: 1fr !important; }
+}
+
+@media (min-width: 480px) and (max-width: 767px) {
+  .lottery-grid { grid-template-columns: repeat(2, 1fr) !important; }
+}
+
+/* ── Bottom nav clearance — prevent content hiding behind the 64px bar ─── */
+@media (max-width: 767px) {
+  .public-page { padding-bottom: 80px !important; }
+}
