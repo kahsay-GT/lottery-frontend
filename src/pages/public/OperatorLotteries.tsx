@@ -3,10 +3,10 @@ import { Link, useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import {
   Ticket, ArrowRight, Calendar, Users, Globe, CheckCircle2,
-  Share2, Copy, Heart, MessageCircle,
+  Share2, Copy,
 } from 'lucide-react'
 import { publicApi } from '../../lib/api'
-import { fmt$, fmtDate, daysLeft } from '../../lib/utils'
+import { fmt$, fmtDate, daysLeft, soldPct, fmtPct } from '../../lib/utils'
 import { StatusBadge } from '../../components/ui/Badge'
 import { Spinner } from '../../components/ui/Spinner'
 import { PublicNav } from '../../components/layout/PublicNav'
@@ -26,25 +26,6 @@ interface LotteryRow {
   images?: { id: string; url: string }[]
 }
 
-// ─── Interactions ─────────────────────────────────────────────────────────────
-function LotteryInteractions({ lotteryId, lotteryUrl }: { lotteryId: string; lotteryUrl: string }) {
-  const likeKey = `lot_like_${lotteryId}`, countKey = `lot_likes_${lotteryId}`
-  const [liked, setLiked] = useState(() => localStorage.getItem(likeKey) === '1')
-  const [likeCount, setLikeCount] = useState(() => { const s = localStorage.getItem(countKey); if (s) return parseInt(s,10); return 10+(lotteryId.charCodeAt(0)+lotteryId.charCodeAt(1))%91 })
-  const [shareCount]   = useState(() => { const s = localStorage.getItem(`lot_shares_${lotteryId}`); if (s) return parseInt(s,10); return 3+(lotteryId.charCodeAt(2)??0)%30 })
-  const [commentCount] = useState(() => { const s = localStorage.getItem(`lot_comments_${lotteryId}`); if (s) return parseInt(s,10); return 1+(lotteryId.charCodeAt(3)??0)%20 })
-  const [copied, setCopied] = useState(false)
-  const toggleLike = (e: React.MouseEvent) => { e.preventDefault(); e.stopPropagation(); const next=!liked,nc=next?likeCount+1:Math.max(0,likeCount-1); setLiked(next); setLikeCount(nc); localStorage.setItem(likeKey,next?'1':'0'); localStorage.setItem(countKey,String(nc)) }
-  const handleShare = (e: React.MouseEvent) => { e.preventDefault(); e.stopPropagation(); const url=`${window.location.origin}${lotteryUrl}`; if(navigator.share){navigator.share({url}).catch(()=>null)}else{navigator.clipboard.writeText(url).then(()=>{setCopied(true);setTimeout(()=>setCopied(false),1800)})} }
-  const btnStyle = (active?: boolean): React.CSSProperties => ({ display:'flex',alignItems:'center',gap:4,padding:'3px 8px',borderRadius:99,background:active?'rgba(239,68,68,0.12)':'rgba(255,255,255,0.05)',border:`1px solid ${active?'rgba(239,68,68,0.25)':'rgba(255,255,255,0.08)'}`,color:active?'#f87171':'#6b7280',fontSize:11,fontWeight:600,cursor:'pointer',transition:'all 0.15s',userSelect:'none' as const })
-  return (
-    <div style={{display:'flex',alignItems:'center',gap:6,paddingTop:10,marginTop:6,borderTop:'1px solid rgba(255,255,255,0.05)'}} onClick={e=>e.preventDefault()}>
-      <button style={btnStyle(liked)} onClick={toggleLike}><Heart style={{width:11,height:11,fill:liked?'currentColor':'none'}}/>{likeCount}</button>
-      <button style={btnStyle()} onClick={e=>e.preventDefault()}><MessageCircle style={{width:11,height:11}}/>{commentCount}</button>
-      <button style={btnStyle(copied)} onClick={handleShare}>{copied?<Copy style={{width:11,height:11}}/>:<Share2 style={{width:11,height:11}}/>}{copied?'✓':shareCount}</button>
-    </div>
-  )
-}
 
 function VerifiedBadge() {
   const { t } = useLang()
@@ -69,7 +50,8 @@ function ShareProfileButton({ username }: { username: string }) {
 function LotteryCard({ lot, username }: { lot: LotteryRow; username: string }) {
   const { t } = useLang()
   const sold = Number(lot.ticketsSold??0), total = Number(lot.totalTickets??0)
-  const pct  = total ? Math.round((sold/total)*100) : 0
+  const barPct = soldPct(sold, total)
+  const pctStr = fmtPct(sold, total)
   const dl   = lot.drawDate ? daysLeft(lot.drawDate) : 0
   const topPrize = lot.prizes?.[0]
 
@@ -85,8 +67,8 @@ function LotteryCard({ lot, username }: { lot: LotteryRow; username: string }) {
       <div
         className="group"
         style={{background:'rgba(255,255,255,0.04)',border:'1px solid rgba(255,255,255,0.08)',borderRadius:20,overflow:'hidden',transition:'all 0.2s',cursor:'pointer'}}
-        onMouseEnter={e=>{const el=e.currentTarget as HTMLDivElement;el.style.borderColor='rgba(99,102,241,0.4)';el.style.transform='translateY(-3px)';el.style.boxShadow='0 12px 40px rgba(0,0,0,0.3)'}}
-        onMouseLeave={e=>{const el=e.currentTarget as HTMLDivElement;el.style.borderColor='rgba(255,255,255,0.08)';el.style.transform='translateY(0)';el.style.boxShadow='none'}}>
+        onMouseEnter={e=>{const el=e.currentTarget as HTMLDivElement; const light=document.documentElement.classList.contains('light'); el.style.borderColor='rgba(99,102,241,0.4)';el.style.transform='translateY(-3px)';el.style.boxShadow=light?'0 12px 32px rgba(0,0,0,0.12)':'0 12px 40px rgba(0,0,0,0.3)'}}
+        onMouseLeave={e=>{const el=e.currentTarget as HTMLDivElement; const light=document.documentElement.classList.contains('light'); el.style.borderColor=light?'rgba(0,0,0,0.1)':'rgba(255,255,255,0.08)';el.style.transform='translateY(0)';el.style.boxShadow='none'}}>
 
         {/* Image area with slider */}
         <div style={{position:'relative',height:140,overflow:'hidden',flexShrink:0}}>
@@ -106,25 +88,19 @@ function LotteryCard({ lot, username }: { lot: LotteryRow; username: string }) {
         </div>
 
         <div style={{padding:'16px 20px'}}>
-          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12,marginBottom:16}}>
+          <div style={{marginBottom:16}}>
             <div style={{background:'rgba(0,0,0,0.2)',borderRadius:12,padding:'10px 14px'}}>
               <p style={{fontSize:10.5,color:'#6b7280',margin:'0 0 4px',textTransform:'uppercase',letterSpacing:'0.06em'}}>{t('operatorLotteries','ticketPrice')}</p>
               <p style={{fontSize:20,fontWeight:800,color:'#34d399',margin:0}}>{fmt$(Number(lot.ticketPrice))}</p>
             </div>
-            {topPrize && (
-              <div style={{background:'rgba(0,0,0,0.2)',borderRadius:12,padding:'10px 14px'}}>
-                <p style={{fontSize:10.5,color:'#6b7280',margin:'0 0 4px',textTransform:'uppercase',letterSpacing:'0.06em'}}>{t('operatorLotteries','topPrize')}</p>
-                <p style={{fontSize:20,fontWeight:800,color:'#fbbf24',margin:0}}>{fmt$(Number(topPrize.prizeValue))}</p>
-              </div>
-            )}
           </div>
           <div style={{marginBottom:14}}>
             <div style={{display:'flex',justifyContent:'space-between',marginBottom:6}}>
               <span style={{fontSize:12,color:'#6b7280'}}>{sold.toLocaleString()} / {total.toLocaleString()} {t('operatorLotteries','sold')}</span>
-              <span style={{fontSize:12,fontWeight:700,color:pct>=80?'#f87171':'#818cf8'}}>{pct}%</span>
+              <span style={{fontSize:12,fontWeight:700,color:barPct>=80?'#f87171':'#818cf8'}}>{pctStr}</span>
             </div>
-            <div style={{height:6,background:'rgba(255,255,255,0.07)',borderRadius:99}}>
-              <div style={{height:'100%',borderRadius:99,width:`${pct}%`,transition:'width 0.4s',background:pct>=80?'linear-gradient(90deg,#f87171,#ef4444)':pct>=50?'linear-gradient(90deg,#fbbf24,#f59e0b)':'linear-gradient(90deg,#818cf8,#6366f1)'}}/>
+            <div style={{height:6,borderRadius:99,background:'rgba(255,255,255,0.07)',overflow:'hidden',width:'100%'}}>
+              <div style={{height:6,borderRadius:99,width:`${Math.max(barPct>0?2:0,barPct)}%`,transition:'width 0.4s ease',background:barPct>=80?'linear-gradient(90deg,#f87171,#ef4444)':barPct>=50?'linear-gradient(90deg,#fbbf24,#f59e0b)':'linear-gradient(90deg,#818cf8,#6366f1)'}}/>
             </div>
           </div>
           <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',flexWrap:'wrap',gap:8}}>
@@ -140,7 +116,6 @@ function LotteryCard({ lot, username }: { lot: LotteryRow; username: string }) {
               {t('operatorLotteries','buyTickets')} <ArrowRight style={{width:12,height:12}}/>
             </div>
           </div>
-          <LotteryInteractions lotteryId={lot.id} lotteryUrl={`/${username}/lotteries/${lot.slug}`}/>
         </div>
       </div>
     </Link>

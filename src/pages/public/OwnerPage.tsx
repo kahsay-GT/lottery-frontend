@@ -12,10 +12,10 @@ import { useQuery } from '@tanstack/react-query'
 import {
   Ticket, Trophy, Archive, Calendar,
   Globe, ArrowRight,
-  Users, CheckCircle2, Copy, Share2, Heart, MessageCircle,
+  Users, CheckCircle2, Copy, Share2,
 } from 'lucide-react'
 import { publicApi } from '../../lib/api'
-import { fmt$, fmtDate, daysLeft } from '../../lib/utils'
+import { fmt$, fmtDate, daysLeft, soldPct, fmtPct } from '../../lib/utils'
 import { StatusBadge } from '../../components/ui/Badge'
 import { Spinner } from '../../components/ui/Spinner'
 import { PublicNav } from '../../components/layout/PublicNav'
@@ -53,41 +53,6 @@ function VerifiedBadge({ small = false }: { small?: boolean }) {
   )
 }
 
-// ─── Like / Comment / Share ───────────────────────────────────────────────────
-function useLotteryInteraction(lotteryId: string) {
-  const likeKey = `lot_like_${lotteryId}`, countKey = `lot_likes_${lotteryId}`
-  const [liked, setLiked] = useState(() => localStorage.getItem(likeKey) === '1')
-  const [likeCount, setLikeCount] = useState(() => { const s = localStorage.getItem(countKey); if (s) return parseInt(s,10); return 10 + (lotteryId.charCodeAt(0)+lotteryId.charCodeAt(1))%91 })
-  const [shareCount]   = useState(() => { const s = localStorage.getItem(`lot_shares_${lotteryId}`); if (s) return parseInt(s,10); return 3+(lotteryId.charCodeAt(2)??0)%30 })
-  const [commentCount] = useState(() => { const s = localStorage.getItem(`lot_comments_${lotteryId}`); if (s) return parseInt(s,10); return 1+(lotteryId.charCodeAt(3)??0)%20 })
-  const toggleLike = (e: React.MouseEvent) => {
-    e.preventDefault(); e.stopPropagation()
-    const next = !liked, nextCount = next ? likeCount+1 : Math.max(0,likeCount-1)
-    setLiked(next); setLikeCount(nextCount)
-    localStorage.setItem(likeKey, next?'1':'0'); localStorage.setItem(countKey, String(nextCount))
-  }
-  return { liked, likeCount, commentCount, shareCount, toggleLike }
-}
-
-function LotteryInteractions({ lotteryId, lotteryUrl }: { lotteryId: string; lotteryUrl: string }) {
-  const { liked, likeCount, commentCount, shareCount, toggleLike } = useLotteryInteraction(lotteryId)
-  const [copied, setCopied] = useState(false)
-  const handleShare = (e: React.MouseEvent) => {
-    e.preventDefault(); e.stopPropagation()
-    const url = `${window.location.origin}${lotteryUrl}`
-    if (navigator.share) { navigator.share({ title: 'Check out this lottery!', url }).catch(()=>null) }
-    else { navigator.clipboard.writeText(url).then(()=>{ setCopied(true); setTimeout(()=>setCopied(false),1800) }) }
-  }
-  const btnStyle = (active?: boolean): React.CSSProperties => ({ display:'flex', alignItems:'center', gap:4, padding:'3px 8px', borderRadius:99, background: active?'rgba(239,68,68,0.12)':'rgba(255,255,255,0.05)', border:`1px solid ${active?'rgba(239,68,68,0.25)':'rgba(255,255,255,0.08)'}`, color: active?'#f87171':'#6b7280', fontSize:11, fontWeight:600, cursor:'pointer', transition:'all 0.15s', userSelect:'none' as const })
-  return (
-    <div style={{ display:'flex', alignItems:'center', gap:6, paddingTop:10, marginTop:6, borderTop:'1px solid rgba(255,255,255,0.05)' }} onClick={e=>e.preventDefault()}>
-      <button style={btnStyle(liked)} onClick={toggleLike}><Heart style={{width:11,height:11,fill:liked?'currentColor':'none'}}/>{likeCount}</button>
-      <button style={btnStyle()} onClick={e=>e.preventDefault()}><MessageCircle style={{width:11,height:11}}/>{commentCount}</button>
-      <button style={btnStyle(copied)} onClick={handleShare}>{copied?<Copy style={{width:11,height:11}}/>:<Share2 style={{width:11,height:11}}/>}{copied?'✓':shareCount}</button>
-    </div>
-  )
-}
-
 // ─── Share profile ────────────────────────────────────────────────────────────
 function ShareProfileButton({ username }: { username: string }) {
   const { t } = useLang()
@@ -105,10 +70,10 @@ function ShareProfileButton({ username }: { username: string }) {
 }
 
 // ─── Tab button ───────────────────────────────────────────────────────────────
-function TabBtn({ id, label, icon: Icon, active, onClick }: { id: TabId; label: string; icon: React.ElementType; active: boolean; onClick: ()=>void }) {
+function TabBtn({ id: _id, label, icon: Icon, active, onClick }: { id: TabId; label: string; icon: React.ElementType; active: boolean; onClick: ()=>void }) {
   return (
-    <button onClick={onClick} style={{ display:'flex', alignItems:'center', gap:7, padding:'10px 20px', borderRadius:12, fontSize:14, fontWeight:600, cursor:'pointer', border:'none', transition:'all 0.18s', background: active?'linear-gradient(135deg,rgba(99,102,241,0.25),rgba(139,92,246,0.18))':'rgba(255,255,255,0.04)', color: active?'#a5b4fc':'#6b7280', outline: active?'1px solid rgba(99,102,241,0.35)':'1px solid rgba(255,255,255,0.07)', boxShadow: active?'0 4px 14px rgba(99,102,241,0.15)':'none' }}>
-      <Icon style={{width:15,height:15}}/>{label}
+    <button onClick={onClick} style={{ flex: 1, minWidth: 0, display:'flex', alignItems:'center', justifyContent:'center', gap:5, padding:'9px 8px', borderRadius:10, fontSize:12.5, fontWeight:600, cursor:'pointer', border:'none', transition:'all 0.18s', background: active?'linear-gradient(135deg,rgba(99,102,241,0.25),rgba(139,92,246,0.18))':'rgba(255,255,255,0.04)', color: active?'#a5b4fc':'#6b7280', outline: active?'1px solid rgba(99,102,241,0.35)':'1px solid rgba(255,255,255,0.07)', boxShadow: active?'0 4px 14px rgba(99,102,241,0.15)':'none', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>
+      <Icon style={{width:13,height:13,flexShrink:0}}/><span style={{overflow:'hidden',textOverflow:'ellipsis'}}>{label}</span>
     </button>
   )
 }
@@ -117,15 +82,16 @@ function TabBtn({ id, label, icon: Icon, active, onClick }: { id: TabId; label: 
 function LotteryCard({ lot, username, closed=false }: { lot: LotteryRow; username: string; closed?: boolean }) {
   const { t } = useLang()
   const sold = Number(lot.ticketsSold??0), total = Number(lot.totalTickets??0)
-  const pct  = total ? Math.round((sold/total)*100) : 0
+  const barPct = soldPct(sold, total)
+  const pctStr = fmtPct(sold, total)
   const dl   = lot.drawDate ? daysLeft(lot.drawDate) : 0
   const topPrize = lot.prizes?.[0]
 
   return (
     <Link to={`/${username}/lotteries/${lot.slug}`} style={{textDecoration:'none',display:'block'}}>
       <div style={{ background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.08)', borderRadius:18, overflow:'hidden', transition:'all 0.2s', cursor:'pointer', opacity:closed?0.85:1 }}
-        onMouseEnter={e=>{ const el=e.currentTarget as HTMLDivElement; el.style.borderColor=closed?'rgba(255,255,255,0.16)':'rgba(99,102,241,0.4)'; el.style.transform='translateY(-2px)'; el.style.boxShadow='0 8px 30px rgba(0,0,0,0.25)' }}
-        onMouseLeave={e=>{ const el=e.currentTarget as HTMLDivElement; el.style.borderColor='rgba(255,255,255,0.08)'; el.style.transform='none'; el.style.boxShadow='none' }}>
+        onMouseEnter={e=>{ const el=e.currentTarget as HTMLDivElement; const light=document.documentElement.classList.contains('light'); el.style.borderColor=closed?'rgba(99,102,241,0.25)':'rgba(99,102,241,0.4)'; el.style.transform='translateY(-2px)'; el.style.boxShadow=light?'0 8px 24px rgba(0,0,0,0.1)':'0 8px 30px rgba(0,0,0,0.25)' }}
+        onMouseLeave={e=>{ const el=e.currentTarget as HTMLDivElement; const light=document.documentElement.classList.contains('light'); el.style.borderColor=light?'rgba(0,0,0,0.1)':'rgba(255,255,255,0.08)'; el.style.transform='none'; el.style.boxShadow='none' }}>
         {/* Header */}
         <div style={{position:'relative',height:lot.banner?110:'auto',overflow:'hidden'}}>
           {lot.banner ? (
@@ -146,30 +112,19 @@ function LotteryCard({ lot, username, closed=false }: { lot: LotteryRow; usernam
         </div>
         {/* Body */}
         <div style={{padding:'14px 18px'}}>
-          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10,marginBottom:14}}>
+          <div style={{marginBottom:14}}>
             <div style={{background:'rgba(0,0,0,0.2)',borderRadius:10,padding:'9px 12px'}}>
               <p style={{fontSize:10.5,color:'#6b7280',margin:'0 0 3px',textTransform:'uppercase',letterSpacing:'0.06em'}}>{t('ownerPage','ticket')}</p>
               <p style={{fontSize:18,fontWeight:800,color:'#34d399',margin:0}}>{fmt$(Number(lot.ticketPrice))}</p>
             </div>
-            {topPrize ? (
-              <div style={{background:'rgba(0,0,0,0.2)',borderRadius:10,padding:'9px 12px'}}>
-                <p style={{fontSize:10.5,color:'#6b7280',margin:'0 0 3px',textTransform:'uppercase',letterSpacing:'0.06em'}}>{t('ownerPage','topPrize')}</p>
-                <p style={{fontSize:18,fontWeight:800,color:'#fbbf24',margin:0}}>{fmt$(Number(topPrize.prizeValue))}</p>
-              </div>
-            ) : (
-              <div style={{background:'rgba(0,0,0,0.2)',borderRadius:10,padding:'9px 12px'}}>
-                <p style={{fontSize:10.5,color:'#6b7280',margin:'0 0 3px',textTransform:'uppercase',letterSpacing:'0.06em'}}>{t('ownerPage','winnersCount')}</p>
-                <p style={{fontSize:18,fontWeight:800,color:'#a78bfa',margin:0}}>{lot._count?.winners??0}</p>
-              </div>
-            )}
           </div>
           <div style={{marginBottom:12}}>
             <div style={{display:'flex',justifyContent:'space-between',marginBottom:5}}>
               <span style={{fontSize:11.5,color:'#6b7280'}}>{sold.toLocaleString()} / {total.toLocaleString()}</span>
-              <span style={{fontSize:11.5,fontWeight:700,color:pct>=80?'#f87171':'#818cf8'}}>{pct}%</span>
+              <span style={{fontSize:11.5,fontWeight:700,color:barPct>=80?'#f87171':'#818cf8'}}>{pctStr}</span>
             </div>
-            <div style={{height:5,background:'rgba(255,255,255,0.07)',borderRadius:99}}>
-              <div style={{height:'100%',borderRadius:99,width:`${pct}%`,background:closed?'linear-gradient(90deg,#6b7280,#4b5563)':pct>=80?'linear-gradient(90deg,#f87171,#ef4444)':'linear-gradient(90deg,#818cf8,#6366f1)'}}/>
+            <div style={{height:6,borderRadius:99,background:'rgba(255,255,255,0.07)',overflow:'hidden',width:'100%'}}>
+              <div style={{height:6,borderRadius:99,width:`${Math.max(barPct>0?2:0,barPct)}%`,background:closed?'linear-gradient(90deg,#6b7280,#4b5563)':barPct>=80?'linear-gradient(90deg,#f87171,#ef4444)':'linear-gradient(90deg,#818cf8,#6366f1)',transition:'width 0.4s ease'}}/>
             </div>
           </div>
           <div style={{display:'flex',alignItems:'center',justifyContent:'space-between'}}>
@@ -188,7 +143,6 @@ function LotteryCard({ lot, username, closed=false }: { lot: LotteryRow; usernam
               </span>
             )}
           </div>
-          <LotteryInteractions lotteryId={lot.id} lotteryUrl={`/${username}/lotteries/${lot.slug}`}/>
         </div>
       </div>
     </Link>
@@ -203,8 +157,8 @@ function WinnerCard({ w, username }: { w: WinnerRow; username: string }) {
   const prizeColor  = prizeColors[(w.prize?.rank??1)-1] ?? '#818cf8'
   return (
     <div style={{ background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.08)', borderRadius:16, padding:'16px 18px', display:'flex', alignItems:'center', gap:14, transition:'border-color 0.2s, transform 0.2s' }}
-      onMouseEnter={e=>{ const el=e.currentTarget as HTMLDivElement; el.style.borderColor='rgba(99,102,241,0.35)'; el.style.transform='translateY(-2px)' }}
-      onMouseLeave={e=>{ const el=e.currentTarget as HTMLDivElement; el.style.borderColor='rgba(255,255,255,0.08)'; el.style.transform='none' }}>
+      onMouseEnter={e=>{ const el=e.currentTarget as HTMLDivElement; const light=document.documentElement.classList.contains('light'); el.style.borderColor='rgba(99,102,241,0.35)'; el.style.transform='translateY(-2px)'; el.style.boxShadow=light?'0 4px 16px rgba(0,0,0,0.08)':'none' }}
+      onMouseLeave={e=>{ const el=e.currentTarget as HTMLDivElement; const light=document.documentElement.classList.contains('light'); el.style.borderColor=light?'rgba(0,0,0,0.1)':'rgba(255,255,255,0.08)'; el.style.transform='none'; el.style.boxShadow='none' }}>
       <span style={{fontSize:28,flexShrink:0}}>{medal}</span>
       <div style={{flex:1,minWidth:0}}>
         <p style={{fontSize:15,fontWeight:700,color:'#e2e4ea',margin:'0 0 2px'}}>{w.buyerName??'Winner'}</p>
@@ -326,7 +280,7 @@ export function OwnerPage() {
 
       {/* Tabs */}
       <div style={{maxWidth:1200,margin:'0 auto',padding:'0 24px'}}>
-        <div style={{display:'flex',gap:8,flexWrap:'wrap',borderBottom:'1px solid rgba(255,255,255,0.07)'}}>
+        <div style={{display:'flex',gap:6,flexWrap:'nowrap',overflowX:'hidden'}}>
           <TabBtn id="active"  label={`${t('ownerPage','tabActive')} (${activeData?.meta?.total ?? '—'})`}  icon={Ticket}  active={tab==='active'}  onClick={()=>setTab('active') }/>
           <TabBtn id="closed"  label={`${t('ownerPage','tabClosed')} (${closedData?.meta?.total ?? '—'})`}  icon={Archive} active={tab==='closed'}  onClick={()=>setTab('closed')}/>
           <TabBtn id="winners" label={`${t('ownerPage','tabWinners')} (${winnersData?.meta?.total ?? '—'})`} icon={Trophy}  active={tab==='winners'} onClick={()=>setTab('winners')}/>

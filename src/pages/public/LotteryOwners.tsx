@@ -41,17 +41,19 @@ function OperatorCard({ op }: { op: Operator }) {
         }}
         onMouseEnter={e => {
           const el = e.currentTarget as HTMLDivElement
+          const light = document.documentElement.classList.contains('light')
           el.style.borderColor = 'rgba(99,102,241,0.45)'
           el.style.transform = 'translateY(-3px)'
-          el.style.boxShadow = '0 12px 36px rgba(0,0,0,0.3)'
-          el.style.background = 'rgba(99,102,241,0.07)'
+          el.style.boxShadow = light ? '0 12px 36px rgba(0,0,0,0.12)' : '0 12px 36px rgba(0,0,0,0.3)'
+          el.style.background = light ? 'rgba(99,102,241,0.06)' : 'rgba(99,102,241,0.07)'
         }}
         onMouseLeave={e => {
           const el = e.currentTarget as HTMLDivElement
-          el.style.borderColor = 'rgba(255,255,255,0.08)'
+          const light = document.documentElement.classList.contains('light')
+          el.style.borderColor = light ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.08)'
           el.style.transform = 'translateY(0)'
           el.style.boxShadow = 'none'
-          el.style.background = 'rgba(255,255,255,0.04)'
+          el.style.background = light ? 'rgba(0,0,0,0.03)' : 'rgba(255,255,255,0.04)'
         }}
       >
         {/* Header */}

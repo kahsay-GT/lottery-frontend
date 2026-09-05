@@ -491,6 +491,132 @@ html.light [style*="box-shadow: 0 0 14px rgba(99, 102, 241"] {
   box-shadow: 0 0 10px rgba(99,102,241,0.25) !important;
 }
 
+/* ── 15. Owner / operator pages ─────────────────────────────────────────── */
+
+/* rgba(255,255,255,0.55) and rgba(255,255,255,0.6) — overlay type text on banner images */
+html.light [style*="color: rgba(255, 255, 255, 0.55)"],
+html.light [style*="color: rgba(255,255,255,0.55)"] { color: rgba(0,0,0,0.5) !important; }
+html.light [style*="color: rgba(255, 255, 255, 0.6)"],
+html.light [style*="color: rgba(255,255,255,0.6)"]  { color: rgba(0,0,0,0.5) !important; }
+
+/* #a78bfa = rgb(167,139,250) — purple winners count, too light on white */
+html.light [style*="color: rgb(167, 139, 250)"] { color: #6d28d9 !important; }
+
+/* #34d399 = rgb(52,211,153) — emerald ticket price / active count on white bg.
+   Emerald on white fails AA (3.2:1). Use teal-700 instead. */
+html.light [style*="color: rgb(52, 211, 153)"] { color: #0f766e !important; }
+
+/* #4b5563 inactive lottery count badge text — zero lotteries state, already dark enough */
+
+/* Dashed empty-state border rgba(255,255,255,0.1) — covered by solid 0.1 rule above,
+   but dashed variant needs its own selector */
+html.light [style*="border: 1px dashed rgba(255, 255, 255, 0.1)"],
+html.light [style*="border: 1px dashed rgba(255,255,255,0.1)"]  { border-color: rgba(0,0,0,0.14) !important; }
+
+/* Tab strip bottom border rgba(255,255,255,0.07) */
+html.light [style*="border-bottom: 1px solid rgba(255, 255, 255, 0.07)"],
+html.light [style*="border-bottom: 1px solid rgba(255,255,255,0.07)"] {
+  border-bottom-color: rgba(0,0,0,0.1) !important;
+}
+
+/* Skeleton card divider height:1 background rgba(255,255,255,0.05) — handled by rule §2 */
+
+/* Active tab button background — the gradient with indigo needs contrast check.
+   On light bg rgba(99,102,241,0.25) reads as very faint lavender — boost opacity */
+html.light [style*="background: linear-gradient(135deg, rgba(99, 102, 241, 0.25)"],
+html.light [style*="background: linear-gradient(135deg,rgba(99, 102, 241, 0.25)"],
+html.light [style*="background: linear-gradient(135deg,rgba(99,102,241,0.25)"] {
+  background: rgba(99,102,241,0.14) !important;
+}
+
+/* Share / interaction bar top border rgba(255,255,255,0.05) */
+html.light [style*="border-top: 1px solid rgba(255, 255, 255, 0.05)"],
+html.light [style*="border-top: 1px solid rgba(255,255,255,0.05)"] {
+  border-top-color: rgba(0,0,0,0.08) !important;
+}
+
+/* Interaction buttons: non-active background rgba(255,255,255,0.05) — handled by §2
+   Active like button rgba(239,68,68,0.12) bg — fine on light
+   Comment / share #6b7280 text — handled by §4 */
+
+/* Pagination page number buttons */
+html.light button[style*="background: rgba(255, 255, 255, 0.05)"],
+html.light button[style*="background: rgba(255,255,255,0.05)"] {
+  background: rgba(0,0,0,0.05) !important;
+  color: var(--text-muted) !important;
+}
+/* Active page number */
+html.light button[style*="background: rgba(99, 102, 241, 0.3)"],
+html.light button[style*="background: rgba(99,102,241,0.3)"] {
+  background: rgba(99,102,241,0.15) !important;
+  color: #4338ca !important;
+}
+
+/* "View →" and "Buy Tickets →" span — #818cf8 already handled by §5 */
+
+/* No-lotteries empty primary message #9ca3af — already handled by §4 */
+/* rgba(255,255,255,0.05) bg — used on interaction buttons and tab buttons */
+html.light [style*="background: rgba(255, 255, 255, 0.05)"],
+html.light [style*="background: rgba(255,255,255,0.05)"] { background: rgba(0,0,0,0.05) !important; }
+
+/* border rgba(255,255,255,0.05) — interaction strip divider */
+html.light [style*="border-top: 1px solid rgba(255, 255, 255, 0.05)"],
+html.light [style*="border-top: 1px solid rgba(255,255,255,0.05)"] {
+  border-top-color: rgba(0,0,0,0.08) !important;
+}
+
+/* rgba(255,255,255,0.07) progress bar track (also skeleton bars in owner pages) */
+html.light [style*="background: rgba(255, 255, 255, 0.07)"],
+html.light [style*="background: rgba(255,255,255,0.07)"] { background: rgba(0,0,0,0.07) !important; }
+
+/* Pagination number buttons bg (rgba(255,255,255,0.05) already covered above) */
+/* Active pagination button outline */
+html.light [style*="outline: 1px solid rgba(99, 102, 241, 0.4)"],
+html.light [style*="outline: 1px solid rgba(99,102,241,0.4)"] {
+  outline-color: rgba(99,102,241,0.5) !important;
+}
+
+/* #374151 icon on empty states — too dark already fine, but on white needs slightly darker */
+html.light [style*="color: rgb(55, 65, 81)"] { color: #1f2937 !important; }
+
+/* Tab inactive button — box shadow none, outline rgba(255,255,255,0.07) */
+html.light [style*="outline: 1px solid rgba(255, 255, 255, 0.07)"],
+html.light [style*="outline: 1px solid rgba(255,255,255,0.07)"] {
+  outline-color: rgba(0,0,0,0.12) !important;
+}
+
+/* Stat box in OperatorLotteries hero — already handled by surface bg rules */
+
+/* "Browse all lotteries" link in results bar — #6b7280 already handled */
+
+/* Empty state dashed border rgba(255,255,255,0.1) — already handled by border rules */
+
+/* #818cf8 "Buy Tickets →" and "View →" links — darken for light */
+html.light a[style*="color: rgb(129, 140, 248)"],
+html.light div[style*="color: rgb(129, 140, 248)"],
+html.light span[style*="color: rgb(129, 140, 248)"] { color: #4338ca !important; }
+
+/* Share / interaction button default text (#9ca3af already handled) */
+/* Interaction count text #6b7280 already handled */
+
+/* Active tab button text #a5b4fc → dark indigo */
+html.light button[style*="color: rgb(165, 180, 252)"] { color: #4338ca !important; }
+
+/* Active tab button background gradient */
+html.light button[style*="background: linear-gradient(135deg, rgba(99, 102, 241"],
+html.light button[style*="background: linear-gradient(135deg,rgba(99, 102, 241"],
+html.light button[style*="background: linear-gradient(135deg,rgba(99,102,241"] {
+  background: rgba(99,102,241,0.12) !important;
+  outline: 1px solid rgba(99,102,241,0.3) !important;
+}
+
+/* Closed-lottery progress bar fill — grey gradient on white is too faint */
+html.light [style*="background: linear-gradient(90deg, rgb(107, 114, 128)"],
+html.light [style*="background: linear-gradient(90deg,rgb(107, 114, 128)"],
+html.light [style*="background: linear-gradient(90deg,#6b7280"] {
+  background: linear-gradient(90deg,#9ca3af,#6b7280) !important;
+}
+
 /* ── 14. Smooth transitions when switching theme ────────────────────────── */
 html.light * {
   transition: background 0.2s ease, background-color 0.2s ease,
