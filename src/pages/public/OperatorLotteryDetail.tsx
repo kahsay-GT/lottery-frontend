@@ -16,7 +16,7 @@ import {
   Shuffle, ListChecks, Search, X,
 } from 'lucide-react'
 import { publicApi, ticketsApi, paymentsApi, drawsApi, clientsApi } from '../../lib/api'
-import { fmt$, fmtDate, daysLeft, uid } from '../../lib/utils'
+import { fmt$, fmtDate, daysLeft, uid, soldPct, fmtPct } from '../../lib/utils'
 import { Spinner } from '../../components/ui/Spinner'
 import { StatusBadge } from '../../components/ui/Badge'
 import { PublicNav } from '../../components/layout/PublicNav'
@@ -531,7 +531,8 @@ export function OperatorLotteryDetail() {
   const prizes   = (lot.prizes ?? []) as Record<string, unknown>[]
   const sold     = Number(lot.ticketsSold ?? 0)
   const totalTix = Number(lot.totalTickets ?? 0)
-  const pct      = totalTix > 0 ? Math.min(100, Math.max(sold > 0 ? 1 : 0, Math.round((sold / totalTix) * 100))) : 0
+  const barPct   = soldPct(sold, totalTix)
+  const pctStr   = fmtPct(sold, totalTix)
   const dl       = daysLeft(lot.drawDate as string)
   const canBuy   = ['PUBLISHED', 'SELLING'].includes(lot.status as string)
   const client   = lot.client as Record<string, unknown> | undefined
@@ -588,15 +589,22 @@ export function OperatorLotteryDetail() {
 
         {/* Progress bar */}
         <div style={{ marginBottom: 20 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5, fontSize: 12 }}>
-            <span style={{ color: pct >= 80 ? '#fbbf24' : '#9ca3af', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4 }}>
-              {pct >= 80 && <Zap style={{ width: 11, height: 11, color: '#fbbf24', display: 'block', flexShrink: 0 }} />}
-              {pct}% {t('lotteryDetail', 'ticketsSold')}
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6, fontSize: 12 }}>
+            <span style={{ color: barPct >= 80 ? '#fbbf24' : '#9ca3af', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4 }}>
+              {barPct >= 80 && <Zap style={{ width: 11, height: 11, color: '#fbbf24', display: 'block', flexShrink: 0 }} />}
+              {pctStr} {t('lotteryDetail', 'ticketsSold')}
             </span>
-            <span style={{ color: '#6b7280' }}>{(totalTix - sold).toLocaleString()} remaining</span>
+            <span style={{ color: '#6b7280' }}>{sold.toLocaleString()} / {totalTix.toLocaleString()}</span>
           </div>
-          <div style={{ height: 10, borderRadius: 99, background: 'rgba(255,255,255,0.06)', overflow: 'hidden' }}>
-            <div style={{ height: '100%', borderRadius: 99, width: `${Math.max(pct > 0 ? 3 : 0, pct)}%`, background: pct >= 80 ? 'linear-gradient(90deg,#f59e0b,#ef4444)' : 'linear-gradient(90deg,#4f46e5,#8b5cf6)', boxShadow: pct >= 80 ? '0 0 10px rgba(245,158,11,0.4)' : '0 0 10px rgba(99,102,241,0.4)', transition: 'width 1.2s ease' }} />
+          <div style={{ height: 8, borderRadius: 99, background: 'rgba(255,255,255,0.08)', overflow: 'hidden', width: '100%' }}>
+            <div style={{
+              height: 8,
+              width: `${Math.max(barPct > 0 ? 2 : 0, barPct)}%`,
+              borderRadius: 99,
+              background: barPct >= 80 ? 'linear-gradient(90deg,#f59e0b,#ef4444)' : 'linear-gradient(90deg,#4f46e5,#8b5cf6)',
+              boxShadow: barPct >= 80 ? '0 0 8px rgba(245,158,11,0.5)' : '0 0 8px rgba(99,102,241,0.5)',
+              transition: 'width 1.2s ease',
+            }} />
           </div>
         </div>
 

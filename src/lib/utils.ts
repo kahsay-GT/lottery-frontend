@@ -9,7 +9,7 @@ export const fmt$ = (n: number) => {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(n)
-  return `${formatted}`
+  return `ETB ${formatted}`
 }
 
 export const fmtDate = (d: string | Date | null | undefined): string => {
@@ -34,6 +34,31 @@ export const daysLeft = (d: string | Date | null | undefined): number => {
 }
 
 export const uid = () => Math.random().toString(36).slice(2) + Date.now().toString(36)
+
+/**
+ * Returns the raw fill percentage (0–100) for a progress bar.
+ * Always uses the real ratio — never rounded — so even 0.1% shows a visible fill.
+ */
+export const soldPct = (sold: number, total: number): number => {
+  if (!total || total <= 0) return 0
+  return Math.min(100, (sold / total) * 100)
+}
+
+/**
+ * Returns a human-readable percentage string that accurately reflects sales:
+ *   0 sold          → "0%"
+ *   1–999 of 20000  → "0.3%"  (one decimal when < 10%)
+ *   1000 of 20000   → "5%"    (integer when ≥ 10%)
+ *   20000 of 20000  → "100%"
+ */
+export const fmtPct = (sold: number, total: number): string => {
+  if (!total || total <= 0 || sold <= 0) return '0%'
+  const ratio = (sold / total) * 100
+  if (ratio >= 10) return `${Math.round(ratio)}%`
+  if (ratio >= 1)  return `${ratio.toFixed(1)}%`
+  // very small — show one significant decimal, e.g. 0.3%
+  return `${ratio.toFixed(1)}%`
+}
 
 export const statusColor: Record<string, string> = {
   ACTIVE:          'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',

@@ -302,149 +302,199 @@ html.light {
 @keyframes spin    { from { transform: rotate(0deg) } to { transform: rotate(360deg) } }
 
 /* ─────────────────────────────────────────────────────────────────────────────
-   LIGHT MODE — override hardcoded inline styles in public pages
-   Pages set background / color as inline styles so we use !important + filter
+   LIGHT MODE — comprehensive inline-style overrides
+   React renders hex values as rgb() in the DOM, so we match both forms.
+   Selectors are intentionally broad (no tag restriction) so they catch div,
+   p, span, h*, a, button, li, td — wherever the inline style appears.
 ───────────────────────────────────────────────────────────────────────────── */
 
-/* ─────────────────────────────────────────────────────────────────────────────
-   LIGHT MODE — override hardcoded inline styles in public pages
-   React renders hex colors as rgb() in the DOM style attribute, so we target
-   both forms. We also inject overrides via the ThemeContext effect.
-───────────────────────────────────────────────────────────────────────────── */
-
-/* 1. Page wrappers — #08090f = rgb(8,9,15), #0d0e1a = rgb(13,14,26) */
+/* ── 1. Page backgrounds ─────────────────────────────────────────────────── */
 html.light [style*="background: rgb(8, 9, 15)"],
 html.light [style*="background: rgba(8, 9, 15"],
-html.light [style*="background-color: rgb(8, 9, 15)"] {
+html.light [style*="background-color: rgb(8, 9, 15)"],
+html.light [style*="background: rgb(8,9,15)"] {
   background: var(--bg-page) !important;
 }
 html.light [style*="background: rgb(13, 14, 26)"],
-html.light [style*="background-color: rgb(13, 14, 26)"] {
+html.light [style*="background-color: rgb(13, 14, 26)"],
+html.light [style*="background: rgb(3, 4, 9)"],
+html.light [style*="background: rgb(3,4,9)"] {
   background: var(--bg-sidebar) !important;
 }
 
-/* 2. Card surfaces — rgba(255,255,255,0.04) and similar */
-html.light [style*="background: rgba(255, 255, 255, 0.04)"],
-html.light [style*="background: rgba(255,255,255,0.04)"] {
-  background: rgba(0,0,0,0.04) !important;
-}
-html.light [style*="background: rgba(255, 255, 255, 0.035)"],
-html.light [style*="background: rgba(255,255,255,0.035)"] {
-  background: rgba(0,0,0,0.03) !important;
-}
-html.light [style*="background: rgba(255, 255, 255, 0.055)"],
-html.light [style*="background: rgba(255,255,255,0.055)"] {
-  background: rgba(0,0,0,0.045) !important;
-}
-html.light [style*="background: rgba(255, 255, 255, 0.06)"],
-html.light [style*="background: rgba(255,255,255,0.06)"] {
-  background: rgba(0,0,0,0.05) !important;
-}
-html.light [style*="background: rgba(255, 255, 255, 0.07)"],
-html.light [style*="background: rgba(255,255,255,0.07)"] {
-  background: rgba(0,0,0,0.06) !important;
-}
-html.light [style*="background: rgba(255, 255, 255, 0.08)"],
-html.light [style*="background: rgba(255,255,255,0.08)"] {
-  background: rgba(0,0,0,0.06) !important;
-}
+/* ── 2. Semi-transparent white surfaces → semi-transparent dark ──────────── */
+html.light [style*="background: rgba(255, 255, 255, 0.02)"],
+html.light [style*="background: rgba(255,255,255,0.02)"]  { background: rgba(0,0,0,0.02) !important; }
 html.light [style*="background: rgba(255, 255, 255, 0.03)"],
-html.light [style*="background: rgba(255,255,255,0.03)"] {
-  background: rgba(0,0,0,0.025) !important;
-}
+html.light [style*="background: rgba(255,255,255,0.03)"]  { background: rgba(0,0,0,0.025) !important; }
+html.light [style*="background: rgba(255, 255, 255, 0.035)"],
+html.light [style*="background: rgba(255,255,255,0.035)"] { background: rgba(0,0,0,0.03) !important; }
+html.light [style*="background: rgba(255, 255, 255, 0.04)"],
+html.light [style*="background: rgba(255,255,255,0.04)"]  { background: rgba(0,0,0,0.04) !important; }
 html.light [style*="background: rgba(255, 255, 255, 0.05)"],
-html.light [style*="background: rgba(255,255,255,0.05)"] {
-  background: rgba(0,0,0,0.04) !important;
-}
+html.light [style*="background: rgba(255,255,255,0.05)"]  { background: rgba(0,0,0,0.04) !important; }
+html.light [style*="background: rgba(255, 255, 255, 0.055)"],
+html.light [style*="background: rgba(255,255,255,0.055)"] { background: rgba(0,0,0,0.045) !important; }
+html.light [style*="background: rgba(255, 255, 255, 0.06)"],
+html.light [style*="background: rgba(255,255,255,0.06)"]  { background: rgba(0,0,0,0.05) !important; }
+html.light [style*="background: rgba(255, 255, 255, 0.07)"],
+html.light [style*="background: rgba(255,255,255,0.07)"]  { background: rgba(0,0,0,0.06) !important; }
+html.light [style*="background: rgba(255, 255, 255, 0.08)"],
+html.light [style*="background: rgba(255,255,255,0.08)"]  { background: rgba(0,0,0,0.07) !important; }
+html.light [style*="background: rgba(255, 255, 255, 0.1)"],
+html.light [style*="background: rgba(255,255,255,0.1)"]   { background: rgba(0,0,0,0.07) !important; }
+html.light [style*="background: rgba(255, 255, 255, 0.12)"],
+html.light [style*="background: rgba(255,255,255,0.12)"]  { background: rgba(0,0,0,0.09) !important; }
+html.light [style*="background: rgba(255, 255, 255, 0.15)"],
+html.light [style*="background: rgba(255,255,255,0.15)"]  { background: rgba(0,0,0,0.1) !important; }
 
-/* 3. Inner "dark stat box" rgba(0,0,0,0.2) */
+/* ── 3. Dark/black overlay surfaces → very light ─────────────────────────── */
 html.light [style*="background: rgba(0, 0, 0, 0.2)"],
-html.light [style*="background: rgba(0,0,0,0.2)"] {
-  background: rgba(0,0,0,0.05) !important;
-}
+html.light [style*="background: rgba(0,0,0,0.2)"]  { background: rgba(0,0,0,0.05) !important; }
+html.light [style*="background: rgba(0, 0, 0, 0.3)"],
+html.light [style*="background: rgba(0,0,0,0.3)"]  { background: rgba(0,0,0,0.07) !important; }
+html.light [style*="background: rgba(0, 0, 0, 0.4)"],
+html.light [style*="background: rgba(0,0,0,0.4)"]  { background: rgba(0,0,0,0.08) !important; }
+html.light [style*="background: rgba(0, 0, 0, 0.45)"],
+html.light [style*="background: rgba(0,0,0,0.45)"] { background: rgba(0,0,0,0.08) !important; }
+html.light [style*="background: rgba(0, 0, 0, 0.5)"],
+html.light [style*="background: rgba(0,0,0,0.5)"]  { background: rgba(0,0,0,0.09) !important; }
+html.light [style*="background: rgba(0, 0, 0, 0.55)"],
+html.light [style*="background: rgba(0,0,0,0.55)"] { background: rgba(0,0,0,0.09) !important; }
+html.light [style*="background: rgba(0, 0, 0, 0.6)"],
+html.light [style*="background: rgba(0,0,0,0.6)"]  { background: rgba(0,0,0,0.1) !important; }
+html.light [style*="background: rgba(0, 0, 0, 0.65)"],
+html.light [style*="background: rgba(0,0,0,0.65)"] { background: rgba(0,0,0,0.1) !important; }
 
-/* 4. Hardcoded white / near-white text — scope to text elements only */
-html.light p[style*="color: rgb(255, 255, 255)"],
-html.light span[style*="color: rgb(255, 255, 255)"],
-html.light h1[style*="color: rgb(255, 255, 255)"],
-html.light h2[style*="color: rgb(255, 255, 255)"],
-html.light h3[style*="color: rgb(255, 255, 255)"] {
+/* ── 4. White text → dark (all element types) ────────────────────────────── */
+/* #fff / rgb(255,255,255) */
+html.light [style*="color: rgb(255, 255, 255)"]:not([class*="btn-primary"]):not([style*="background: linear-gradient"]) {
   color: var(--text-primary) !important;
 }
-html.light p[style*="color: rgb(243, 244, 246)"],
-html.light span[style*="color: rgb(243, 244, 246)"],
-html.light h1[style*="color: rgb(243, 244, 246)"],
-html.light h2[style*="color: rgb(243, 244, 246)"],
-html.light h3[style*="color: rgb(243, 244, 246)"] { /* #f3f4f6 */
-  color: var(--text-primary) !important;
-}
-html.light p[style*="color: rgb(226, 228, 234)"],
-html.light span[style*="color: rgb(226, 228, 234)"] { /* #e2e4ea */
-  color: var(--text-secondary) !important;
-}
-html.light p[style*="color: rgb(200, 202, 216)"],
-html.light span[style*="color: rgb(200, 202, 216)"] { /* #c8cad8 */
-  color: var(--text-secondary) !important;
-}
-html.light p[style*="color: rgb(156, 163, 175)"],
-html.light span[style*="color: rgb(156, 163, 175)"],
-html.light a[style*="color: rgb(156, 163, 175)"] { /* #9ca3af — was too light */
-  color: #6b7280 !important;
-}
+/* #f3f4f6 = rgb(243,244,246) */
+html.light [style*="color: rgb(243, 244, 246)"] { color: var(--text-primary) !important; }
+/* #e2e4ea = rgb(226,228,234) */
+html.light [style*="color: rgb(226, 228, 234)"] { color: var(--text-secondary) !important; }
+/* #c8cad8 = rgb(200,202,216) */
+html.light [style*="color: rgb(200, 202, 216)"] { color: var(--text-secondary) !important; }
+/* #d1d5db = rgb(209,213,219) */
+html.light [style*="color: rgb(209, 213, 219)"] { color: var(--text-secondary) !important; }
+/* #9ca3af = rgb(156,163,175) — too light on white */
+html.light [style*="color: rgb(156, 163, 175)"] { color: #4b5563 !important; }
+/* #6b7280 = rgb(107,114,128) — too light on white */
+html.light [style*="color: rgb(107, 114, 128)"] { color: #374151 !important; }
+/* #4b5563 = rgb(75,85,99) — small text, push darker */
+html.light [style*="color: rgb(75, 85, 99)"]    { color: #1f2937 !important; }
+/* #374151 = rgb(55,65,81) — already fairly dark, slight push */
+html.light [style*="color: rgb(55, 65, 81)"]    { color: #111827 !important; }
+/* #1f2937 = rgb(31,41,55) — keep as-is (already dark) */
 
-/* #6b7280 = rgb(107,114,128) — also too light on white, push darker */
-html.light p[style*="color: rgb(107, 114, 128)"],
-html.light span[style*="color: rgb(107, 114, 128)"],
-html.light a[style*="color: rgb(107, 114, 128)"],
-html.light h2[style*="color: rgb(107, 114, 128)"],
-html.light h3[style*="color: rgb(107, 114, 128)"] {
-  color: #4b5563 !important;
-}
+/* ── 5. Indigo/purple accent text — keep but ensure visibility ───────────── */
+/* #a5b4fc = rgb(165,180,252) — too light on white bg */
+html.light [style*="color: rgb(165, 180, 252)"] { color: #4338ca !important; }
+/* #818cf8 = rgb(129,140,248) — too light on white bg */
+html.light [style*="color: rgb(129, 140, 248)"] { color: #4338ca !important; }
+/* #c4b5fd = rgb(196,181,253) — too light */
+html.light [style*="color: rgb(196, 181, 253)"] { color: #6d28d9 !important; }
+/* #e9d5ff = rgb(233,213,255) — too light */
+html.light [style*="color: rgb(233, 213, 255)"] { color: #5b21b6 !important; }
+/* #fde68a = rgb(253,232,138) — too light (amber), use dark amber */
+html.light [style*="color: rgb(253, 232, 138)"] { color: #92400e !important; }
+/* #fbbf24 = rgb(251,191,36) — amber on white, darken */
+html.light [style*="color: rgb(251, 191, 36)"]  { color: #b45309 !important; }
+/* #fb923c = rgb(251,146,60) — orange on white */
+html.light [style*="color: rgb(251, 146, 60)"]  { color: #c2410c !important; }
 
-/* #4b5563 = rgb(75,85,99) — footer tiny text, push to readable */
-html.light p[style*="color: rgb(75, 85, 99)"],
-html.light span[style*="color: rgb(75, 85, 99)"] {
-  color: #374151 !important;
-}
-
-/* 5. Borders */
-html.light [style*="border: 1px solid rgba(255, 255, 255, 0.08)"],
-html.light [style*="border: 1px solid rgba(255,255,255,0.08)"] {
-  border-color: rgba(0,0,0,0.1) !important;
-}
+/* ── 6. Borders: white-alpha → dark-alpha ────────────────────────────────── */
 html.light [style*="border: 1px solid rgba(255, 255, 255, 0.06)"],
-html.light [style*="border: 1px solid rgba(255,255,255,0.06)"] {
-  border-color: rgba(0,0,0,0.07) !important;
-}
+html.light [style*="border: 1px solid rgba(255,255,255,0.06)"]   { border-color: rgba(0,0,0,0.08) !important; }
+html.light [style*="border: 1px solid rgba(255, 255, 255, 0.07)"],
+html.light [style*="border: 1px solid rgba(255,255,255,0.07)"]   { border-color: rgba(0,0,0,0.09) !important; }
+html.light [style*="border: 1px solid rgba(255, 255, 255, 0.08)"],
+html.light [style*="border: 1px solid rgba(255,255,255,0.08)"]   { border-color: rgba(0,0,0,0.11) !important; }
+html.light [style*="border: 1px solid rgba(255, 255, 255, 0.09)"],
+html.light [style*="border: 1px solid rgba(255,255,255,0.09)"]   { border-color: rgba(0,0,0,0.11) !important; }
+html.light [style*="border: 1px solid rgba(255, 255, 255, 0.1)"],
+html.light [style*="border: 1px solid rgba(255,255,255,0.1)"]    { border-color: rgba(0,0,0,0.12) !important; }
+html.light [style*="border: 1px solid rgba(255, 255, 255, 0.12)"],
+html.light [style*="border: 1px solid rgba(255,255,255,0.12)"]   { border-color: rgba(0,0,0,0.14) !important; }
+html.light [style*="border: 1px solid rgba(255, 255, 255, 0.15)"],
+html.light [style*="border: 1px solid rgba(255,255,255,0.15)"]   { border-color: rgba(0,0,0,0.15) !important; }
+html.light [style*="border: 2px dashed rgba(255, 255, 255, 0.08)"],
+html.light [style*="border: 2px dashed rgba(255,255,255,0.08)"]  { border-color: rgba(0,0,0,0.14) !important; }
+html.light [style*="border: 2px dashed rgba(255, 255, 255, 0.12)"],
+html.light [style*="border: 2px dashed rgba(255,255,255,0.12)"]  { border-color: rgba(0,0,0,0.18) !important; }
+html.light [style*="border: 1.5px solid rgba(255, 255, 255, 0.12)"],
+html.light [style*="border: 1.5px solid rgba(255,255,255,0.12)"] { border-color: rgba(0,0,0,0.16) !important; }
+/* directional borders */
+html.light [style*="border-top: 1px solid rgba(255, 255, 255, 0.06)"],
+html.light [style*="border-top: 1px solid rgba(255,255,255,0.06)"]   { border-top-color: rgba(0,0,0,0.08) !important; }
+html.light [style*="border-top: 1px solid rgba(255, 255, 255, 0.08)"],
+html.light [style*="border-top: 1px solid rgba(255,255,255,0.08)"]   { border-top-color: rgba(0,0,0,0.1) !important; }
+html.light [style*="border-bottom: 1px solid rgba(255, 255, 255, 0.06)"],
+html.light [style*="border-bottom: 1px solid rgba(255,255,255,0.06)"] { border-bottom-color: rgba(0,0,0,0.08) !important; }
+html.light [style*="border-bottom: 1px solid rgba(255, 255, 255, 0.07)"],
+html.light [style*="border-bottom: 1px solid rgba(255,255,255,0.07)"] { border-bottom-color: rgba(0,0,0,0.09) !important; }
+html.light [style*="border-right: 1px solid rgba(255, 255, 255, 0.06)"],
+html.light [style*="border-right: 1px solid rgba(255,255,255,0.06)"]  { border-right-color: rgba(0,0,0,0.08) !important; }
+
+/* ── 7. Search / input field text ────────────────────────────────────────── */
+/* input with hardcoded color: #fff — becomes invisible on light bg */
+html.light input[style*="color: rgb(255, 255, 255)"] { color: var(--text-primary) !important; }
+html.light textarea[style*="color: rgb(255, 255, 255)"] { color: var(--text-primary) !important; }
+
+/* ── 8. LangSwitcher container (rgba(255,255,255,0.06) bg) ─────────────────
+   Needs a visible border in light mode — the background flip above handles
+   the fill but we also need the border to show the pill shape.            */
 html.light [style*="border: 1px solid rgba(255, 255, 255, 0.1)"],
 html.light [style*="border: 1px solid rgba(255,255,255,0.1)"] {
-  border-color: rgba(0,0,0,0.12) !important;
+  border-color: rgba(0,0,0,0.14) !important;
 }
-html.light [style*="border: 1px solid rgba(255, 255, 255, 0.07)"],
-html.light [style*="border: 1px solid rgba(255,255,255,0.07)"] {
-  border-color: rgba(0,0,0,0.08) !important;
-}
-html.light [style*="border: 1px solid rgba(255, 255, 255, 0.09)"],
-html.light [style*="border: 1px solid rgba(255,255,255,0.09)"] {
-  border-color: rgba(0,0,0,0.09) !important;
-}
-html.light [style*="border-top: 1px solid rgba(255, 255, 255, 0.06)"],
-html.light [style*="border-top: 1px solid rgba(255,255,255,0.06)"] {
-  border-top-color: rgba(0,0,0,0.07) !important;
-}
-html.light [style*="border-bottom: 1px solid rgba(255, 255, 255, 0.07)"],
-html.light [style*="border-bottom: 1px solid rgba(255,255,255,0.07)"] {
-  border-bottom-color: rgba(0,0,0,0.08) !important;
-}
-html.light [style*="border-right: 1px solid rgba(255, 255, 255, 0.06)"],
-html.light [style*="border-right: 1px solid rgba(255,255,255,0.06)"] {
-  border-right-color: rgba(0,0,0,0.07) !important;
+/* Inactive lang pill (#9ca3af text) — too light on white */
+html.light button[style*="color: rgb(156, 163, 175)"] { color: #374151 !important; }
+
+/* ── 9. Skeleton / loading shimmer ──────────────────────────────────────── */
+html.light [style*="animation: pulse"] {
+  background: rgba(0,0,0,0.06) !important;
 }
 
-/* 6. Smooth transitions on all elements when theme switches */
+/* ── 10. Progress bar track ─────────────────────────────────────────────── */
+/* The track is rgba(255,255,255,0.08) — invisible on white page */
+/* (handled by rule #2 above — rgba(255,255,255,0.08) → rgba(0,0,0,0.07)) */
+
+/* ── 11. Tailwind utility overrides (class-based) ───────────────────────── */
+html.light .text-white          { color: var(--text-primary)   !important; }
+html.light .text-gray-100       { color: var(--text-primary)   !important; }
+html.light .text-gray-200       { color: var(--text-primary)   !important; }
+html.light .text-gray-300       { color: var(--text-secondary) !important; }
+html.light .text-gray-400       { color: var(--text-muted)     !important; }
+html.light .text-gray-500       { color: var(--text-muted)     !important; }
+html.light .bg-gray-950,
+html.light .bg-gray-900         { background: var(--bg-page)   !important; }
+html.light .bg-white\/4,
+html.light .bg-white\/5,
+html.light .bg-white\/6,
+html.light .bg-white\/8         { background: rgba(0,0,0,0.05) !important; }
+html.light .border-white\/8,
+html.light .border-white\/10,
+html.light .border-white\/12    { border-color: rgba(0,0,0,0.12) !important; }
+html.light .hover\:text-white:hover { color: var(--text-primary) !important; }
+
+/* ── 12. Indigo badge pills — active/inactive in LangSwitcher ───────────── */
+/* Active pill keeps its gradient (white text on indigo = fine) */
+/* No override needed for active pill */
+
+/* ── 13. Box-shadows: heavy dark shadows are invisible on light ─────────── */
+html.light [style*="box-shadow: 0 0 8px rgba(99, 102, 241"],
+html.light [style*="box-shadow: 0 0 10px rgba(99, 102, 241"],
+html.light [style*="box-shadow: 0 0 14px rgba(99, 102, 241"] {
+  box-shadow: 0 0 10px rgba(99,102,241,0.25) !important;
+}
+
+/* ── 14. Smooth transitions when switching theme ────────────────────────── */
 html.light * {
   transition: background 0.2s ease, background-color 0.2s ease,
-              color 0.2s ease, border-color 0.2s ease;
+              color 0.2s ease, border-color 0.2s ease !important;
 }
 
 /* ── Responsive visibility helpers ───────────────────────────── */

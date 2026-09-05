@@ -1,1 +1,0 @@
-# Lottery Frontend using React.js and TailwindCSSs

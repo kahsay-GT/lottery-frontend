@@ -4,54 +4,42 @@ import { Ticket, Menu, X, CreditCard, Tag, Home } from 'lucide-react'
 import { useLang } from '../../context/LangContext'
 import { ThemeToggle } from '../../context/ThemeContext'
 
-// ─── Redesigned Language Switcher ────────────────────────────────────────────
-// Shows only the active language label; clicking switches to the other.
-// Visual: pill with active label + a small toggle indicator.
+// ─── Language Switcher ────────────────────────────────────────────────────────
 function LangSwitcher() {
   const { lang, setLang } = useLang()
-  const isEn = lang === 'en'
-  // show the OTHER language — what clicking will switch TO
-  const nextLang  = isEn ? 'am' : 'en'
-  const nextLabel = isEn ? 'አማርኛ' : 'English'
-  const nextAbbr  = isEn ? 'አማ'   : 'EN'
 
   return (
-    <button
-      onClick={() => setLang(nextLang)}
-      title={`Switch to ${nextLabel}`}
-      aria-label={`Switch to ${nextLabel}`}
-      style={{
-        display: 'flex', alignItems: 'center', gap: 6,
-        padding: '4px 10px 4px 5px',
-        borderRadius: 99,
-        border: '1px solid var(--border-strong)',
-        background: 'var(--surface-2)',
-        cursor: 'pointer',
-        flexShrink: 0,
-        transition: 'background 0.2s, border-color 0.2s',
-      }}
-    >
-      {/* Knob showing the language you'll switch TO */}
-      <span style={{
-        width: 22, height: 22, borderRadius: '50%',
-        background: 'linear-gradient(135deg,#4f46e5,#7c3aed)',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        fontSize: 9, fontWeight: 800, color: '#fff', letterSpacing: '0.02em',
-        flexShrink: 0,
-        boxShadow: '0 1px 6px rgba(99,102,241,0.4)',
-      }}>
-        {nextAbbr}
-      </span>
-      {/* Full name of the language you'll switch TO */}
-      <span style={{
-        fontSize: 11.5, fontWeight: 700,
-        color: 'var(--text-secondary)',
-        letterSpacing: '0.03em',
-        whiteSpace: 'nowrap',
-      }}>
-        {nextLabel}
-      </span>
-    </button>
+    <div style={{
+      display: 'flex', alignItems: 'center',
+      background: 'var(--surface-2)',
+      border: '1px solid var(--border-strong)',
+      borderRadius: 8, padding: 2, gap: 1,
+      flexShrink: 0,
+    }}>
+      {(['am', 'en'] as const).map(l => (
+        <button
+          key={l}
+          onClick={() => setLang(l)}
+          title={l === 'am' ? 'አማርኛ' : 'English'}
+          style={{
+            padding: '3px 9px',
+            borderRadius: 6,
+            border: 'none',
+            cursor: 'pointer',
+            fontSize: 11,
+            fontWeight: 700,
+            letterSpacing: '0.04em',
+            transition: 'background 0.15s, color 0.15s',
+            background: lang === l
+              ? 'linear-gradient(135deg,#4f46e5,#7c3aed)'
+              : 'transparent',
+            color: lang === l ? '#fff' : 'var(--text-muted)',
+          }}
+        >
+          {l === 'am' ? 'አማ' : 'EN'}
+        </button>
+      ))}
+    </div>
   )
 }
 

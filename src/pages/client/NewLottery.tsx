@@ -1,9 +1,13 @@
+import { useEffect, useRef, useState } from 'react'
 import { useFieldArray, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Link, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
-import { Plus, Trash2, ArrowLeft, Ticket, AlertCircle, CheckCircle2, Clock, Package } from 'lucide-react'
+import {
+  Plus, Trash2, ArrowLeft, Ticket, AlertCircle, CheckCircle2,
+  Clock, Package, Images, Lock, Upload,
+} from 'lucide-react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { lotteriesApi, plansApi, getErr } from '../../lib/api'
 import { Input } from '../../components/ui/Input'
@@ -11,7 +15,6 @@ import { Textarea } from '../../components/ui/Textarea'
 import { Select } from '../../components/ui/Select'
 import { Spinner } from '../../components/ui/Spinner'
 import { fmt$ } from '../../lib/utils'
-import { useState } from 'react'
 import { ImageManager, type SliderImage } from '../../components/ui/ImageSlider'
 
 // ─── Zod schema ────────────────────────────────────────────────────────────
@@ -48,18 +51,19 @@ const schema = z.object({
 
 type F = z.infer<typeof schema>
 
-// ─── Images section shown after lottery is created ──────────────────────────
+// ─── Images section ─────────────────────────────────────────────────────────
+// Mirrors EditLottery's ImagesSection exactly.
+// When lotteryId is null the card renders in a locked/pending state.
 function ImagesSection({
   lotteryId,
-  onDone,
 }: {
-  lotteryId: string
-  onDone: () => void
+  lotteryId: string | null
 }) {
-  const [images, setImages]   = useState<SliderImage[]>([])
+  const [images, setImages]       = useState<SliderImage[]>([])
   const [uploading, setUploading] = useState(false)
 
   const handleUpload = async (file: File) => {
+    if (!lotteryId) return
     if (!file.type.startsWith('image/')) { toast.error('Please select an image file'); return }
     if (file.size > 10 * 1024 * 1024)   { toast.error('Image must be under 10 MB'); return }
     setUploading(true)
@@ -76,6 +80,7 @@ function ImagesSection({
   }
 
   const handleDelete = async (imageId: string) => {
+    if (!lotteryId) return
     try {
       await lotteriesApi.deleteImage(lotteryId, imageId)
       setImages(prev => prev.filter(i => i.id !== imageId))
@@ -85,14 +90,66 @@ function ImagesSection({
     }
   }
 
-  return (
-    <div className="glass-card p-6 space-y-4">
-      <div className="flex items-center justify-between">
+  // ── Locked state — shown before lottery is created ──────────────────────
+  if (!lotteryId) {
+    return (
+      <div className="glass-card p-6 space-y-3" style={{ opacity: 0.55 }}>
         <h2 className="section-title flex items-center gap-2">
-          <Ticket className="w-4 h-4 text-primary-400" /> Lottery Images
+          <Images className="w-4 h-4 text-primary-400" />
+          Lottery Images
           <span className="text-xs font-normal text-gray-500 ml-1">optional · up to 10 photos</span>
+          <span style={{
+            display: 'inline-flex', alignItems: 'center', gap: 4,
+            fontSize: 11, fontWeight: 600, color: '#6b7280',
+            background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
+            borderRadius: 99, padding: '2px 9px', marginLeft: 4,
+          }}>
+            <Lock style={{ width: 10, height: 10 }} /> Unlocks after creation
+          </span>
         </h2>
+        <p className="text-xs text-gray-500">
+          Images slide automatically on your public lottery card and detail page.
+          Recommended: 1200 × 800 px, JPG or WebP.
+        </p>
+        {/* Placeholder grid */}
+        <div style={{
+          display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))',
+          gap: 10, pointerEvents: 'none',
+        }}>
+          {[0, 1, 2].map(i => (
+            <div key={i} style={{
+              height: 96, borderRadius: 12,
+              background: 'rgba(255,255,255,0.04)',
+              border: '2px dashed rgba(255,255,255,0.08)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              <Upload style={{ width: 20, height: 20, color: 'rgba(255,255,255,0.1)' }} />
+            </div>
+          ))}
+        </div>
       </div>
+    )
+  }
+
+  // ── Unlocked state — full ImageManager ──────────────────────────────────
+  return (
+    <div className="glass-card p-6 space-y-3" style={{
+      border: '1px solid rgba(52,211,153,0.25)',
+      boxShadow: '0 0 0 1px rgba(52,211,153,0.1)',
+    }}>
+      <h2 className="section-title flex items-center gap-2">
+        <Images className="w-4 h-4 text-emerald-400" />
+        Lottery Images
+        <span className="text-xs font-normal text-gray-500 ml-1">optional · up to 10 · uploads immediately</span>
+        <span style={{
+          display: 'inline-flex', alignItems: 'center', gap: 4,
+          fontSize: 11, fontWeight: 600, color: '#34d399',
+          background: 'rgba(52,211,153,0.1)', border: '1px solid rgba(52,211,153,0.25)',
+          borderRadius: 99, padding: '2px 9px', marginLeft: 4,
+        }}>
+          <CheckCircle2 style={{ width: 10, height: 10 }} /> Ready
+        </span>
+      </h2>
       <p className="text-xs text-gray-500">
         Images slide automatically on your public lottery card and detail page.
         Recommended: 1200 × 800 px, JPG or WebP.
@@ -104,11 +161,6 @@ function ImagesSection({
         onDelete={handleDelete}
         uploading={uploading}
       />
-      <div className="flex justify-end gap-3 pt-2">
-        <button onClick={onDone} className="btn-primary flex items-center gap-2 px-6">
-          <CheckCircle2 className="w-4 h-4" /> Done — Go to Lotteries
-        </button>
-      </div>
     </div>
   )
 }
@@ -132,7 +184,7 @@ function SubGate({ sub }: { sub: Record<string, unknown> | null }) {
     )
   }
 
-  const status = sub.status as string
+  const status   = sub.status as string
   const planName = (sub.plan as Record<string, string> | null)?.name ?? 'Plan'
 
   if (status === 'PENDING') {
@@ -182,8 +234,12 @@ function SubGate({ sub }: { sub: Record<string, unknown> | null }) {
       <div className="glass-card p-8 border border-red-500/30 bg-red-500/5 text-center space-y-4">
         <AlertCircle className="w-14 h-14 text-red-400 mx-auto" />
         <div>
-          <h2 className="text-xl font-bold text-white">Subscription {status === 'EXPIRED' ? 'Expired' : 'Cancelled'}</h2>
-          <p className="text-gray-400 text-sm mt-1">Please subscribe to a new plan to continue creating lotteries.</p>
+          <h2 className="text-xl font-bold text-white">
+            Subscription {status === 'EXPIRED' ? 'Expired' : 'Cancelled'}
+          </h2>
+          <p className="text-gray-400 text-sm mt-1">
+            Please subscribe to a new plan to continue creating lotteries.
+          </p>
         </div>
         <Link to="/client/subscription" className="btn-primary inline-flex items-center gap-2 px-6 py-3">
           <Package className="w-4 h-4" /> Renew Subscription
@@ -198,19 +254,24 @@ function SubGate({ sub }: { sub: Record<string, unknown> | null }) {
 // ─── Main page ──────────────────────────────────────────────────────────────
 export function ClientNewLottery() {
   const navigate = useNavigate()
-  const qc = useQueryClient()
+  const qc       = useQueryClient()
+  const imagesSectionRef = useRef<HTMLDivElement>(null)
+
+  // createdId is set once the lottery is saved; images section unlocks immediately
   const [createdId, setCreatedId] = useState<string | null>(null)
 
-  // Check subscription status BEFORE rendering the form
+  // Subscription check
   const { data: subRes, isLoading: subLoading } = useQuery({
     queryKey: ['my-sub'],
     queryFn: () => plansApi.myActive().then(r => r.data?.data),
   })
-  // my-subscription/active returns the sub object directly in data.data
-  const sub = subRes ?? null
-  const isActive = (sub as Record<string,unknown>)?.status === 'ACTIVE'
+  const sub      = subRes ?? null
+  const isActive = (sub as Record<string, unknown>)?.status === 'ACTIVE'
 
-  const { register, control, handleSubmit, watch, setValue, formState: { errors, isSubmitting } } = useForm<F>({
+  const {
+    register, control, handleSubmit, watch, setValue,
+    formState: { errors, isSubmitting },
+  } = useForm<F>({
     resolver: zodResolver(schema),
     defaultValues: {
       type: 'STANDARD', visibility: 'PUBLIC',
@@ -219,21 +280,29 @@ export function ClientNewLottery() {
   })
 
   const { fields, append, remove } = useFieldArray({ control, name: 'prizes' })
-  const ticketPrice  = Number(watch('ticketPrice') || 0)
-  const totalTickets = Number(watch('totalTickets') || 0)
-  const ticketStart  = Number(watch('ticketStart') || 1)
-  // Auto-derive ticketEnd preview
+  const ticketPrice      = Number(watch('ticketPrice')   || 0)
+  const totalTickets     = Number(watch('totalTickets')  || 0)
+  const ticketStart      = Number(watch('ticketStart')   || 1)
   const ticketEndPreview = totalTickets > 0 ? ticketStart + totalTickets - 1 : null
+
+  // Scroll to images section once lottery is created
+  useEffect(() => {
+    if (createdId && imagesSectionRef.current) {
+      imagesSectionRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }, [createdId])
 
   const mut = useMutation({
     mutationFn: (d: F) => lotteriesApi.create(d),
     onSuccess: (res) => {
       qc.invalidateQueries({ queryKey: ['client-lotteries'] })
-      toast.success('Lottery created! Add a banner image or skip to finish.')
-      // Stay on page to optionally upload banner
       const id = res.data?.data?.id ?? res.data?.id
-      if (id) setCreatedId(id)
-      else navigate('/client/lotteries')
+      if (id) {
+        setCreatedId(id)
+        toast.success('Lottery created! Add images below, then finish.')
+      } else {
+        navigate('/client/lotteries')
+      }
     },
     onError: (e) => {
       const msg = getErr(e)
@@ -249,18 +318,19 @@ export function ClientNewLottery() {
   })
 
   // Plan limits info
-  const plan = sub?.plan as Record<string, unknown> | null
+  const plan      = sub?.plan as Record<string, unknown> | null
   const planLimits = plan ? {
     maxTickets: Number(plan.maxTicketsPerLottery ?? 0),
     minPrice:   Number(plan.minTicketPrice ?? 0),
     maxPrice:   Number(plan.maxTicketPrice ?? 0),
     quota:      Number(plan.maxLotteriesPerCycle ?? 0),
-    used:       Number((sub as Record<string,unknown>)?.lotteriesUsed ?? 0),
+    used:       Number((sub as Record<string, unknown>)?.lotteriesUsed ?? 0),
   } : null
 
   return (
     <div className="space-y-6 max-w-6xl">
-      {/* Back button */}
+
+      {/* Header */}
       <div className="flex items-center gap-4">
         <Link to="/client/lotteries">
           <button className="btn-secondary flex items-center gap-2 text-sm px-3 py-2">
@@ -275,23 +345,6 @@ export function ClientNewLottery() {
         </div>
       </div>
 
-      {/* ── Post-creation: upload images ── */}
-      {createdId && (
-        <div className="space-y-4">
-          <div className="glass-card p-5 border border-emerald-500/25 bg-emerald-500/5 flex items-center gap-3">
-            <CheckCircle2 className="w-6 h-6 text-emerald-400 shrink-0" />
-            <div className="flex-1">
-              <p className="font-semibold text-white">Lottery created!</p>
-              <p className="text-sm text-gray-400">Upload photos that will slide on your public card and detail page, then finish.</p>
-            </div>
-          </div>
-          <ImagesSection lotteryId={createdId} onDone={() => navigate('/client/lotteries')} />
-        </div>
-      )}
-
-      {/* Hide the form once lottery is created */}
-      {!createdId && (<>
-
       {/* Loading */}
       {subLoading && (
         <div className="flex justify-center py-10"><Spinner className="w-8 h-8" /></div>
@@ -300,13 +353,13 @@ export function ClientNewLottery() {
       {/* Subscription gate */}
       {!subLoading && !isActive && <SubGate sub={sub} />}
 
-      {/* Plan info bar when active */}
+      {/* Plan info bar */}
       {!subLoading && isActive && planLimits && (
         <div className="glass-card p-4 border border-emerald-500/20 bg-emerald-500/5">
           <div className="flex flex-wrap items-center gap-4 text-sm">
             <span className="flex items-center gap-1.5 text-emerald-400 font-semibold">
               <CheckCircle2 className="w-4 h-4" />
-              {(sub?.plan as Record<string,string>)?.name} Plan — Active
+              {(sub?.plan as Record<string, string>)?.name} Plan — Active
             </span>
             <span className="text-gray-400">Max {planLimits.maxTickets.toLocaleString()} tickets</span>
             <span className="text-gray-400">Price: {fmt$(planLimits.minPrice)} – {fmt$(planLimits.maxPrice)}</span>
@@ -317,164 +370,203 @@ export function ClientNewLottery() {
         </div>
       )}
 
-      {/* The actual form — only shown when ACTIVE */}
+      {/* ── Created banner ── */}
+      {createdId && (
+        <div className="glass-card p-5 border border-emerald-500/25 bg-emerald-500/5 flex items-center gap-3">
+          <CheckCircle2 className="w-6 h-6 text-emerald-400 shrink-0" />
+          <div className="flex-1">
+            <p className="font-semibold text-white">Lottery created!</p>
+            <p className="text-sm text-gray-400">
+              The form is now locked. Upload photos below, then click <strong className="text-white">Finish</strong>.
+            </p>
+          </div>
+          <button
+            onClick={() => navigate('/client/lotteries')}
+            className="btn-primary text-sm px-5 py-2 flex items-center gap-2 shrink-0"
+          >
+            <CheckCircle2 className="w-4 h-4" /> Finish
+          </button>
+        </div>
+      )}
+
+      {/* ── Form (locked via fieldset disabled once created) ── */}
       {!subLoading && isActive && (
         <form onSubmit={handleSubmit(d => mut.mutate(d))} className="space-y-5">
 
-          {/* Basic Info + Tickets & Pricing — side by side */}
-          <div className="grid grid-cols-2 gap-5 items-start">
+            {/* Basic Info + Tickets & Pricing */}
+            <div className="grid grid-cols-2 gap-5 items-start">
 
-            {/* Basic Info */}
-            <div className="glass-card p-6 space-y-4">
-              <h2 className="section-title">Basic Information</h2>
-              <Input label="Lottery Name *" placeholder="Summer Jackpot 2026"
-                error={errors.name?.message} {...register('name')} />
-              <Textarea label="Description" placeholder="Describe your lottery…"
-                {...register('description')} />
-              <div className="grid grid-cols-2 gap-4">
-                <Select label="Type *"
-                  options={[
-                    { value: 'STANDARD',     label: 'Standard' },
-                    { value: 'RAFFLE',       label: 'Raffle' },
-                    { value: 'SCRATCH_CARD', label: 'Scratch Card' },
-                    { value: 'INSTANT_WIN',  label: 'Instant Win' },
-                  ]}
-                  {...register('type')} />
-                <Select label="Visibility *"
-                  options={[
-                    { value: 'PUBLIC',   label: 'Public' },
-                    { value: 'PRIVATE',  label: 'Private' },
-                    { value: 'UNLISTED', label: 'Unlisted' },
-                  ]}
-                  {...register('visibility')} />
-              </div>
-            </div>
-
-            {/* Tickets & Pricing */}
-            <div className="glass-card p-6 space-y-4">
-              <h2 className="section-title">Tickets &amp; Pricing</h2>
-              <div className="grid grid-cols-2 gap-4">
-                <Input label="Ticket Price ($) *" type="number" step="0.01" min="0.01"
-                  error={errors.ticketPrice?.message} {...register('ticketPrice')}
-                  hint={planLimits ? `Plan range: ${fmt$(planLimits.minPrice)} – ${fmt$(planLimits.maxPrice)}` : undefined} />
-                <Input label="Total Tickets *" type="number" min="1"
-                  error={errors.totalTickets?.message} {...register('totalTickets')}
-                  hint={planLimits ? `Plan max: ${planLimits.maxTickets.toLocaleString()}` : undefined} />
-              </div>
-
-              {/* Ticket Number Range */}
-              <div style={{ padding: '16px 18px', borderRadius: 14, background: 'rgba(99,102,241,0.07)', border: '1px solid rgba(99,102,241,0.2)' }}>
-                <p style={{ fontSize: 12, fontWeight: 700, color: '#818cf8', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 12px' }}>
-                  Ticket Number Range
-                </p>
+              {/* Basic Info */}
+              <div className="glass-card p-6 space-y-4" style={createdId ? { opacity: 0.5, pointerEvents: 'none' } : {}}>
+                <h2 className="section-title">Basic Information</h2>
+                <Input label="Lottery Name *" placeholder="Summer Jackpot 2026"
+                  error={errors.name?.message} {...register('name')} />
+                <Textarea label="Description" placeholder="Describe your lottery…"
+                  {...register('description')} />
                 <div className="grid grid-cols-2 gap-4">
-                  <Input label="Start Number *" type="number" min="1"
-                    error={errors.ticketStart?.message}
-                    hint="First ticket number (e.g. 1 or 1000)"
-                    {...register('ticketStart')}
-                    onChange={e => {
-                      const start = parseInt(e.target.value) || 1
-                      register('ticketStart').onChange(e)
-                      const total = Number(watch('totalTickets') || 0)
-                      if (total > 0) setValue('ticketEnd', start + total - 1)
-                    }}
-                  />
-                  <Input label="End Number" type="number" min="1"
-                    error={errors.ticketEnd?.message}
-                    hint={ticketEndPreview ? `Auto: ${ticketEndPreview}` : 'Auto-calculated'}
-                    {...register('ticketEnd')}
-                  />
+                  <Select label="Type *"
+                    options={[
+                      { value: 'STANDARD',     label: 'Standard' },
+                      { value: 'RAFFLE',       label: 'Raffle' },
+                      { value: 'SCRATCH_CARD', label: 'Scratch Card' },
+                      { value: 'INSTANT_WIN',  label: 'Instant Win' },
+                    ]}
+                    {...register('type')} />
+                  <Select label="Visibility *"
+                    options={[
+                      { value: 'PUBLIC',   label: 'Public' },
+                      { value: 'PRIVATE',  label: 'Private' },
+                      { value: 'UNLISTED', label: 'Unlisted' },
+                    ]}
+                    {...register('visibility')} />
                 </div>
-                {ticketEndPreview && totalTickets > 0 && (
-                  <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <span style={{ fontSize: 12, color: '#6b7280' }}>Range preview:</span>
-                    <span style={{ fontFamily: 'monospace', fontSize: 13, fontWeight: 700, color: '#e2e4ea' }}>
-                      {String(ticketStart).padStart(String(ticketEndPreview).length, '0')}
-                      {' '}<span style={{ color: '#6b7280' }}>→</span>{' '}
-                      {ticketEndPreview}
-                    </span>
-                    <span style={{ fontSize: 11.5, color: '#34d399' }}>({totalTickets.toLocaleString()} tickets)</span>
-                  </div>
-                )}
               </div>
 
-              {/* Live revenue preview */}
-              {ticketPrice > 0 && totalTickets > 0 && (
-                <div className="rounded-2xl bg-gradient-to-r from-primary-900/40 to-purple-900/40 border border-primary-500/20 p-4 flex items-center justify-between">
-                  <div>
-                    <p className="text-xs text-gray-400">Potential Revenue (if sold out)</p>
-                    <p className="text-3xl font-black text-white">{fmt$(ticketPrice * totalTickets)}</p>
-                    <p className="text-xs text-gray-500">{totalTickets.toLocaleString()} tickets × {fmt$(ticketPrice)}</p>
-                  </div>
-                  <Ticket className="w-12 h-12 text-primary-600/30" />
+              {/* Tickets & Pricing */}
+              <div className="glass-card p-6 space-y-4" style={createdId ? { opacity: 0.5, pointerEvents: 'none' } : {}}>
+                <h2 className="section-title">Tickets &amp; Pricing</h2>
+                <div className="grid grid-cols-2 gap-4">
+                  <Input label="Ticket Price *" type="number" step="0.01" min="0.01"
+                    error={errors.ticketPrice?.message} {...register('ticketPrice')}
+                    hint={planLimits ? `Plan range: ${fmt$(planLimits.minPrice)} – ${fmt$(planLimits.maxPrice)}` : undefined} />
+                  <Input label="Total Tickets *" type="number" min="1"
+                    error={errors.totalTickets?.message} {...register('totalTickets')}
+                    hint={planLimits ? `Plan max: ${planLimits.maxTickets.toLocaleString()}` : undefined} />
                 </div>
-              )}
 
-              <div className="grid grid-cols-3 gap-4">
-                <Input label="Sale Start *" type="datetime-local"
-                  error={errors.saleStartDate?.message} {...register('saleStartDate')} />
-                <Input label="Sale End *" type="datetime-local"
-                  error={errors.saleEndDate?.message} {...register('saleEndDate')} />
-                <Input label="Draw Date *" type="datetime-local"
-                  error={errors.drawDate?.message} {...register('drawDate')} />
-              </div>
-            </div>
-
-          </div>{/* end two-column row */}
-
-          {/* Prizes — full width */}
-          <div className="glass-card p-6 space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="section-title">Prizes</h2>
-              <button type="button"
-                onClick={() => append({ rank: fields.length + 1, title: '', prizeValue: 0, quantity: 1 })}
-                className="btn-secondary text-xs flex items-center gap-1.5 px-3 py-1.5">
-                <Plus className="w-3.5 h-3.5" /> Add Prize
-              </button>
-            </div>
-            {errors.prizes?.message && (
-              <p className="text-xs text-red-400">{errors.prizes.message}</p>
-            )}
-            {fields.map((f, i) => (
-              <div key={f.id} className="grid grid-cols-5 gap-3 p-4 rounded-2xl bg-white/4 border border-white/8">
-                <Input label="Rank" type="number" min="1" {...register(`prizes.${i}.rank`)} />
-                <Input label="Title *" placeholder="First Prize"
-                  error={errors.prizes?.[i]?.title?.message} {...register(`prizes.${i}.title`)} />
-                <Input label="Description" placeholder="Optional" {...register(`prizes.${i}.description`)} />
-                <Input label="Value ($)" type="number" step="0.01" min="0"
-                  {...register(`prizes.${i}.prizeValue`)} />
-                <div className="flex items-end gap-2">
-                  <Input label="Qty" type="number" min="1" {...register(`prizes.${i}.quantity`)} />
-                  {fields.length > 1 && (
-                    <button type="button" onClick={() => remove(i)}
-                      className="mb-0.5 p-2 rounded-lg hover:bg-red-500/20 text-gray-400 hover:text-red-400 transition-colors">
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                {/* Ticket Number Range */}
+                <div style={{ padding: '16px 18px', borderRadius: 14, background: 'rgba(99,102,241,0.07)', border: '1px solid rgba(99,102,241,0.2)' }}>
+                  <p style={{ fontSize: 12, fontWeight: 700, color: '#818cf8', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 12px' }}>
+                    Ticket Number Range
+                  </p>
+                  <div className="grid grid-cols-2 gap-4">
+                    <Input label="Start Number *" type="number" min="1"
+                      error={errors.ticketStart?.message}
+                      hint="First ticket number (e.g. 1 or 1000)"
+                      {...register('ticketStart')}
+                      onChange={e => {
+                        const start = parseInt(e.target.value) || 1
+                        register('ticketStart').onChange(e)
+                        const total = Number(watch('totalTickets') || 0)
+                        if (total > 0) setValue('ticketEnd', start + total - 1)
+                      }}
+                    />
+                    <Input label="End Number" type="number" min="1"
+                      error={errors.ticketEnd?.message}
+                      hint={ticketEndPreview ? `Auto: ${ticketEndPreview}` : 'Auto-calculated'}
+                      {...register('ticketEnd')}
+                    />
+                  </div>
+                  {ticketEndPreview && totalTickets > 0 && (
+                    <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <span style={{ fontSize: 12, color: '#6b7280' }}>Range preview:</span>
+                      <span style={{ fontFamily: 'monospace', fontSize: 13, fontWeight: 700, color: '#e2e4ea' }}>
+                        {String(ticketStart).padStart(String(ticketEndPreview).length, '0')}
+                        {' '}<span style={{ color: '#6b7280' }}>→</span>{' '}
+                        {ticketEndPreview}
+                      </span>
+                      <span style={{ fontSize: 11.5, color: '#34d399' }}>({totalTickets.toLocaleString()} tickets)</span>
+                    </div>
                   )}
                 </div>
+
+                {/* Revenue preview */}
+                {ticketPrice > 0 && totalTickets > 0 && (
+                  <div className="rounded-2xl bg-gradient-to-r from-primary-900/40 to-purple-900/40 border border-primary-500/20 p-4 flex items-center justify-between">
+                    <div>
+                      <p className="text-xs text-gray-400">Potential Revenue (if sold out)</p>
+                      <p className="text-3xl font-black text-white">{fmt$(ticketPrice * totalTickets)}</p>
+                      <p className="text-xs text-gray-500">{totalTickets.toLocaleString()} tickets × {fmt$(ticketPrice)}</p>
+                    </div>
+                    <Ticket className="w-12 h-12 text-primary-600/30" />
+                  </div>
+                )}
+
+                <div className="grid grid-cols-3 gap-4">
+                  <Input label="Sale Start *" type="datetime-local"
+                    error={errors.saleStartDate?.message} {...register('saleStartDate')} />
+                  <Input label="Sale End *" type="datetime-local"
+                    error={errors.saleEndDate?.message} {...register('saleEndDate')} />
+                  <Input label="Draw Date *" type="datetime-local"
+                    error={errors.drawDate?.message} {...register('drawDate')} />
+                </div>
               </div>
-            ))}
+
+            </div>{/* end two-column row */}
+
+            {/* Prizes */}
+            <div className="glass-card p-6 space-y-4" style={createdId ? { opacity: 0.5, pointerEvents: 'none' } : {}}>
+              <div className="flex items-center justify-between">
+                <h2 className="section-title">Prizes</h2>
+                <button type="button"
+                  onClick={() => append({ rank: fields.length + 1, title: '', prizeValue: 0, quantity: 1 })}
+                  className="btn-secondary text-xs flex items-center gap-1.5 px-3 py-1.5">
+                  <Plus className="w-3.5 h-3.5" /> Add Prize
+                </button>
+              </div>
+              {errors.prizes?.message && (
+                <p className="text-xs text-red-400">{errors.prizes.message}</p>
+              )}
+              {fields.map((f, i) => (
+                <div key={f.id} className="grid grid-cols-5 gap-3 p-4 rounded-2xl bg-white/4 border border-white/8">
+                  <Input label="Rank" type="number" min="1" {...register(`prizes.${i}.rank`)} />
+                  <Input label="Title *" placeholder="First Prize"
+                    error={errors.prizes?.[i]?.title?.message} {...register(`prizes.${i}.title`)} />
+                  <Input label="Description" placeholder="Optional" {...register(`prizes.${i}.description`)} />
+                  <Input label="Value" type="number" step="0.01" min="0"
+                    {...register(`prizes.${i}.prizeValue`)} />
+                  <div className="flex items-end gap-2">
+                    <Input label="Qty" type="number" min="1" {...register(`prizes.${i}.quantity`)} />
+                    {fields.length > 1 && (
+                      <button type="button" onClick={() => remove(i)}
+                        className="mb-0.5 p-2 rounded-lg hover:bg-red-500/20 text-gray-400 hover:text-red-400 transition-colors">
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+          {/* ── Images — always visible, locks/unlocks based on createdId ── */}
+          <div ref={imagesSectionRef}>
+            <ImagesSection lotteryId={createdId} />
           </div>
 
-          {/* Terms — full width */}
-          <div className="glass-card p-6">
+          {/* Terms */}
+          <div className="glass-card p-6" style={createdId ? { opacity: 0.5, pointerEvents: 'none' } : {}}>
             <Textarea label="Terms &amp; Conditions"
               placeholder="Enter terms and conditions for this lottery…"
               rows={4} {...register('termsConditions')} />
           </div>
 
-          {/* Submit */}
+          {/* Actions */}
           <div className="flex justify-end gap-3">
-            <Link to="/client/lotteries">
-              <button type="button" className="btn-secondary">Cancel</button>
-            </Link>
-            <button type="submit" disabled={isSubmitting} className="btn-primary flex items-center gap-2 px-6">
-              {isSubmitting ? <Spinner /> : <><Plus className="w-4 h-4" /> Create Lottery</>}
-            </button>
+            {createdId ? (
+              <button
+                type="button"
+                onClick={() => navigate('/client/lotteries')}
+                className="btn-primary flex items-center gap-2 px-6"
+              >
+                <CheckCircle2 className="w-4 h-4" /> Finish
+              </button>
+            ) : (
+              <>
+                <Link to="/client/lotteries">
+                  <button type="button" className="btn-secondary">Cancel</button>
+                </Link>
+                <button type="submit" disabled={isSubmitting || mut.isPending}
+                  className="btn-primary flex items-center gap-2 px-6">
+                  {isSubmitting || mut.isPending
+                    ? <Spinner />
+                    : <><Plus className="w-4 h-4" /> Create Lottery</>}
+                </button>
+              </>
+            )}
           </div>
+
         </form>
       )}
-      </>)}
     </div>
   )
 }

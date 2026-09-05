@@ -2,12 +2,12 @@ import { useState, useRef, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import {
-  Search, Ticket, Calendar, DollarSign, Trophy,
+  Search, Ticket, Calendar, Trophy,
   ArrowRight, Zap, Users, Clock, X,
-  ChevronLeft, ChevronRight, Sparkles, TrendingUp,
+  ChevronLeft, ChevronRight, Sparkles,
 } from 'lucide-react'
 import { lotteriesApi } from '../../lib/api'
-import { fmt$, fmtDate, daysLeft } from '../../lib/utils'
+import { fmt$, fmtDate, daysLeft, soldPct, fmtPct } from '../../lib/utils'
 import { StatusBadge } from '../../components/ui/Badge'
 import { Spinner } from '../../components/ui/Spinner'
 import { PublicNav } from '../../components/layout/PublicNav'
@@ -18,10 +18,11 @@ function LotteryCard({ lot, idx }: { lot: Record<string, unknown>; idx: number }
   const { t } = useLang()
   const total  = Number(lot.totalTickets ?? 0)
   const sold   = Number(lot.ticketsSold  ?? 0)
-  const pct    = total ? Math.round((sold / total) * 100) : 0
+  const barPct = soldPct(sold, total)          // raw ratio for bar fill
+  const pctStr = fmtPct(sold, total)           // display string
   const prizes = (lot.prizes ?? []) as Record<string, unknown>[]
   const dl     = lot.drawDate ? daysLeft(lot.drawDate as string) : 0
-  const urgent = pct >= 80 || dl <= 3
+  const urgent = barPct >= 80 || dl <= 3
 
   const gradients = [
     'from-indigo-900/80 via-purple-900/60',
@@ -61,7 +62,7 @@ function LotteryCard({ lot, idx }: { lot: Record<string, unknown>; idx: number }
 
         {/* Urgency badges — top left */}
         <div className="absolute top-3 left-3 flex flex-col gap-1.5" style={{ zIndex: 4 }}>
-          {urgent && pct >= 80 && (
+          {urgent && barPct >= 80 && (
             <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold" style={{ background: 'rgba(239,68,68,0.85)', color: '#fff' }}>
               <Zap className="w-3 h-3" /> {t('lotteries', 'almostFull')}
             </span>
@@ -83,7 +84,6 @@ function LotteryCard({ lot, idx }: { lot: Record<string, unknown>; idx: number }
           className="absolute bottom-3 left-3 flex items-center gap-1.5 px-2.5 py-1 rounded-full"
           style={{ zIndex: 4, background: 'rgba(0,0,0,0.6)', border: '1px solid rgba(255,255,255,0.15)' }}
         >
-          <DollarSign className="w-3.5 h-3.5 text-emerald-400" />
           <span className="text-white text-sm font-bold">{fmt$(Number(lot.ticketPrice ?? 0))}</span>
           <span className="text-gray-400 text-xs">{t('lotteries', 'perTicket')}</span>
         </div>
@@ -115,22 +115,28 @@ function LotteryCard({ lot, idx }: { lot: Record<string, unknown>; idx: number }
         {/* Progress */}
         <div>
           <div className="flex justify-between text-xs mb-1.5" style={{ color: '#6b7280' }}>
-            <span className="font-medium" style={{ color: pct > 80 ? '#f87171' : '#9ca3af' }}>{pct}{t('lotteries', 'pctSold')}</span>
+            <span className="font-medium" style={{ color: barPct > 80 ? '#f87171' : '#9ca3af' }}>{pctStr}</span>
             <span>{sold.toLocaleString()} / {total.toLocaleString()} {t('lotteries', 'tickets')}</span>
           </div>
-          <div className="h-2 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.07)' }}>
-            <div className="h-full rounded-full transition-all duration-700" style={{ width: `${pct}%`, background: pct > 80 ? 'linear-gradient(to right, #ef4444, #f97316)' : 'linear-gradient(to right, #6366f1, #8b5cf6)' }} />
+          <div style={{ height: 7, borderRadius: 99, background: 'rgba(255,255,255,0.08)', overflow: 'hidden', width: '100%' }}>
+            <div style={{
+              height: 7,
+              width: `${Math.max(barPct > 0 ? 2 : 0, barPct)}%`,
+              borderRadius: 99,
+              background: barPct > 80 ? 'linear-gradient(90deg,#ef4444,#f97316)' : 'linear-gradient(90deg,#6366f1,#8b5cf6)',
+              transition: 'width 0.7s ease',
+            }} />
           </div>
         </div>
 
         <div className="flex items-center justify-between mt-auto" style={{ fontSize: 12, color: '#6b7280' }}>
           <div className="flex items-center gap-1">
             <Calendar className="w-3.5 h-3.5" />
-            <span>{t('lotteries', 'draw')} {lot.drawDate ? fmtDate(lot.drawDate as string) : '—'}</span>
+            <span>{lot.drawDate ? fmtDate(lot.drawDate as string) : '—'}</span>
           </div>
           <div className="flex items-center gap-1">
             <Users className="w-3.5 h-3.5" />
-            <span>{total.toLocaleString()} {t('lotteries', 'tickets')}</span>
+            <span>{total.toLocaleString()}</span>
           </div>
         </div>
 
@@ -194,7 +200,7 @@ export function PublicLotteries() {
       {/* Hero */}
       <div style={{ position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', width: 700, height: 400, background: 'radial-gradient(ellipse, rgba(99,102,241,0.15) 0%, transparent 70%)', pointerEvents: 'none' }} />
-        <div style={{ position: 'relative', maxWidth: 1280, margin: '0 auto', padding: '64px 24px 40px', textAlign: 'center' }}>
+        <div style={{ position: 'relative', maxWidth: 1280, margin: '0 auto', padding: '48px 24px 32px', textAlign: 'center' }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '5px 14px', borderRadius: 99, background: 'rgba(99,102,241,0.15)', border: '1px solid rgba(99,102,241,0.3)', marginBottom: 20 }}>
             <Sparkles className="w-3.5 h-3.5" style={{ color: '#818cf8' }} />
             <span style={{ fontSize: 12, fontWeight: 700, color: '#a5b4fc', letterSpacing: '0.05em' }}>
@@ -202,7 +208,7 @@ export function PublicLotteries() {
             </span>
           </div>
 
-          <h1 style={{ fontSize: 'clamp(36px,6vw,64px)', fontWeight: 900, color: '#fff', letterSpacing: '-0.03em', lineHeight: 1.05, margin: '0 0 16px' }}>
+          <h1 style={{ fontSize: 'clamp(28px,5vw,52px)', fontWeight: 900, color: '#fff', letterSpacing: '-0.03em', lineHeight: 1.05, margin: '0 0 20px' }}>
             {t('lotteries', 'headline').replace(t('lotteries', 'gradientWord'), '')}{' '}
             <span style={{ background: 'linear-gradient(135deg,#818cf8,#c084fc)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
               {t('lotteries', 'gradientWord')}
@@ -210,26 +216,23 @@ export function PublicLotteries() {
           </h1>
 
           {/* Search */}
-          <div style={{ maxWidth: 600, margin: '0 auto', position: 'relative' }}>
-            <div style={{ position: 'relative', display: 'flex', alignItems: 'center', background: 'rgba(255,255,255,0.06)', border: '1.5px solid rgba(255,255,255,0.12)', borderRadius: 16, overflow: 'hidden', transition: 'border-color 0.2s' }}>
-              <Search className="w-5 h-5 shrink-0" style={{ color: '#6b7280', margin: '0 0 0 18px' }} />
+          <div style={{ maxWidth: 540, margin: '0 auto' }}>
+            <div style={{ position: 'relative', display: 'flex', alignItems: 'center', background: 'rgba(255,255,255,0.06)', border: '1.5px solid rgba(255,255,255,0.12)', borderRadius: 14, overflow: 'hidden', transition: 'border-color 0.2s' }}>
+              <Search className="w-4 h-4 shrink-0" style={{ color: '#6b7280', margin: '0 0 0 16px' }} />
               <input
                 ref={searchRef}
                 value={search}
                 onChange={e => setSearch(e.target.value)}
                 placeholder={t('lotteries', 'searchPlaceholder')}
-                style={{ flex: 1, height: 52, padding: '0 12px', background: 'transparent', border: 'none', outline: 'none', fontSize: 15, color: '#fff', fontFamily: 'inherit' }}
+                style={{ flex: 1, height: 48, padding: '0 12px', background: 'transparent', border: 'none', outline: 'none', fontSize: 15, color: '#fff', fontFamily: 'inherit' }}
                 onFocus={e => (e.currentTarget.parentElement!.style.borderColor = 'rgba(99,102,241,0.6)')}
                 onBlur={e  => (e.currentTarget.parentElement!.style.borderColor = 'rgba(255,255,255,0.12)')}
               />
               {search && (
-                <button onClick={clearSearch} style={{ padding: '0 16px', background: 'none', border: 'none', cursor: 'pointer', color: '#6b7280' }}>
+                <button onClick={clearSearch} style={{ padding: '0 14px', background: 'none', border: 'none', cursor: 'pointer', color: '#6b7280', display: 'flex', alignItems: 'center' }}>
                   <X className="w-4 h-4" />
                 </button>
               )}
-              <button onClick={() => {}} className="btn-primary" style={{ margin: 6, padding: '10px 20px', borderRadius: 10, fontSize: 14, flexShrink: 0 }}>
-                {t('lotteries', 'searchBtn')}
-              </button>
             </div>
           </div>
         </div>
@@ -248,11 +251,9 @@ export function PublicLotteries() {
                   {debouncedSearch && <> {t('lotteries', 'matching')} <span style={{ color: '#818cf8' }}>"{debouncedSearch}"</span></>}
                 </>
               )}
-            </p>
-          </div>
+            </p>          </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <TrendingUp className="w-4 h-4" style={{ color: '#6b7280' }} />
-            <select value={sort} onChange={e => { setSort(e.target.value); setPage(1) }} className="input-dark" style={{ height: 36, width: 180, fontSize: 13 }}>
+            <select value={sort} onChange={e => { setSort(e.target.value); setPage(1) }} className="input-dark" style={{ height: 36, width: 150, fontSize: 13 }}>
               {SORT.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
             </select>
           </div>
@@ -266,13 +267,13 @@ export function PublicLotteries() {
           </div>
         ) : lotteries.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '80px 24px' }}>
-            <div style={{ width: 80, height: 80, borderRadius: 24, background: 'rgba(255,255,255,0.04)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
-              <Ticket className="w-10 h-10" style={{ color: '#374151' }} />
+            <div style={{ width: 64, height: 64, borderRadius: 20, background: 'rgba(255,255,255,0.04)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+              <Ticket className="w-8 h-8" style={{ color: '#374151' }} />
             </div>
-            <h3 style={{ fontSize: 20, fontWeight: 700, color: '#e2e4ea', margin: '0 0 8px' }}>
+            <h3 style={{ fontSize: 17, fontWeight: 700, color: '#e2e4ea', margin: '0 0 6px' }}>
               {debouncedSearch ? t('lotteries', 'noResultsSearch').replace('{q}', debouncedSearch) : t('lotteries', 'noResults')}
             </h3>
-            <p style={{ fontSize: 14, color: '#6b7280', margin: '0 0 24px' }}>
+            <p style={{ fontSize: 13, color: '#6b7280', margin: '0 0 20px' }}>
               {debouncedSearch ? t('lotteries', 'tryDifferent') : t('lotteries', 'checkBack')}
             </p>
             {debouncedSearch && (
@@ -310,8 +311,8 @@ export function PublicLotteries() {
         )}
       </main>
 
-      <footer style={{ borderTop: '1px solid rgba(255,255,255,0.06)', padding: '24px', textAlign: 'center' }}>
-        <p style={{ fontSize: 13, color: '#4b5563', margin: 0 }}>
+      <footer style={{ borderTop: '1px solid rgba(255,255,255,0.06)', padding: '20px 24px', textAlign: 'center' }}>
+        <p style={{ fontSize: 12, color: '#4b5563', margin: 0 }}>
           © {new Date().getFullYear()} LotterySaaS ·{' '}
           <Link to="/login" style={{ color: '#6366f1', textDecoration: 'none' }}>{t('lotteries', 'operatorLogin')}</Link>
         </p>

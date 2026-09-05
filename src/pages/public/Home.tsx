@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { ArrowRight, ChevronRight, Ticket, Sparkles } from 'lucide-react'
 import { publicApi } from '../../lib/api'
-import { fmt$, fmtDate } from '../../lib/utils'
+import { fmt$, fmtDate, soldPct, fmtPct } from '../../lib/utils'
 import { Spinner } from '../../components/ui/Spinner'
 import { PublicNav } from '../../components/layout/PublicNav'
 import { useLang } from '../../context/LangContext'
@@ -12,7 +12,8 @@ function LotteryCard({ lot }: { lot: Record<string, unknown> }) {
   const { t } = useLang()
   const sold  = Number(lot.ticketsSold  ?? 0)
   const total = Number(lot.totalTickets ?? 0)
-  const pct   = total ? Math.round((sold / total) * 100) : 0
+  const barPct = soldPct(sold, total)
+  const pctStr = fmtPct(sold, total)
 
   return (
     <Link to={`/lotteries/${lot.slug as string}`} style={{ textDecoration: 'none', display: 'block' }}>
@@ -54,15 +55,17 @@ function LotteryCard({ lot }: { lot: Record<string, unknown> }) {
         <div style={{ marginBottom: 12 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
             <span style={{ fontSize: 11.5, color: '#6b7280' }}>{sold.toLocaleString()} / {total.toLocaleString()} {t('home', 'sold')}</span>
-            <span style={{ fontSize: 11.5, fontWeight: 700, color: pct >= 80 ? '#f87171' : '#818cf8' }}>{pct}%</span>
+            <span style={{ fontSize: 11.5, fontWeight: 700, color: barPct >= 80 ? '#f87171' : '#818cf8' }}>{pctStr}</span>
           </div>
-          <div style={{ height: 4, background: 'rgba(255,255,255,0.07)', borderRadius: 99 }}>
+          <div style={{ height: 6, background: 'rgba(255,255,255,0.08)', borderRadius: 99, overflow: 'hidden', width: '100%' }}>
             <div style={{
-              height: '100%', borderRadius: 99, width: `${pct}%`,
-              background: pct >= 80
+              height: 6,
+              width: `${Math.max(barPct > 0 ? 2 : 0, barPct)}%`,
+              borderRadius: 99,
+              background: barPct >= 80
                 ? 'linear-gradient(90deg,#f87171,#ef4444)'
                 : 'linear-gradient(90deg,#818cf8,#6366f1)',
-              transition: 'width 0.4s',
+              transition: 'width 0.4s ease',
             }} />
           </div>
         </div>
