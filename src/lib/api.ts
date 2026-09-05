@@ -202,6 +202,8 @@ export const lotteriesApi = {
 export const ticketsApi = {
   reserve: (b: object) => api.post('/tickets/reserve', b),
   lottery: (id: string, p?: object) => api.get(`/tickets/lottery/${id}`, { params: p }),
+  availableNumbers: (lotteryId: string, limit = 500) =>
+    api.get<{ data?: string[] } | string[]>(`/tickets/lottery/${lotteryId}/available-numbers`, { params: { limit } }),
 }
 
 // ── Payments ─────────────────────────────────────────────────────

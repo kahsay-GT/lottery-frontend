@@ -2,7 +2,7 @@
  * /:username/lotteries/:slug  — operator-scoped lottery detail + purchase flow
  * 4-step flow: Prizes → Details → Payment → Done
  */
-import { useState, useCallback, useRef } from 'react'
+import { useState, useCallback, useRef, useMemo } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
@@ -13,6 +13,7 @@ import {
   Trophy, Ticket, Upload, CheckCircle2, Copy,
   ArrowLeft, ArrowRight, FileText, Phone, User, Hash,
   Banknote, AlertCircle, ExternalLink, Gift, Zap,
+  Shuffle, ListChecks, Search, X,
 } from 'lucide-react'
 import { publicApi, ticketsApi, paymentsApi, drawsApi, clientsApi } from '../../lib/api'
 import { fmt$, fmtDate, daysLeft, uid } from '../../lib/utils'
@@ -23,6 +24,7 @@ import { useLang } from '../../context/LangContext'
 import { DetailSlider, type SliderImage } from '../../components/ui/ImageSlider'
 
 type Step = 'prizes' | 'info' | 'upload' | 'done'
+type SelectionMode = 'auto' | 'manual'
 
 function Icon({ children }: { children: React.ReactNode }) {
   return <span style={{ display: 'inline-flex', alignItems: 'center', flexShrink: 0, lineHeight: 0 }}>{children}</span>
@@ -130,6 +132,231 @@ function FileZone({ file, onFile }: { file: File | null; onFile: (f: File) => vo
   )
 }
 
+// ─── Ticket Picker ────────────────────────────────────────────────────────────
+interface TicketPickerProps {
+  lotteryId: string
+  quantity: number
+  selectionMode: SelectionMode
+  onModeChange: (m: SelectionMode) => void
+  selectedNumbers: string[]
+  onSelectedChange: (nums: string[]) => void
+}
+
+function TicketPicker({ lotteryId, quantity, selectionMode, onModeChange, selectedNumbers, onSelectedChange }: TicketPickerProps) {
+  const [search, setSearch] = useState('')
+
+  const { data: rawAvail, isLoading: loadingNums } = useQuery({
+    queryKey: ['available-nums', lotteryId],
+    queryFn: () => ticketsApi.availableNumbers(lotteryId, 500).then(r => {
+      const d = (r.data as any)
+      return (Array.isArray(d) ? d : d?.data ?? []) as string[]
+    }),
+    enabled: selectionMode === 'manual' && Boolean(lotteryId),
+    staleTime: 30_000,
+  })
+  const available = rawAvail ?? []
+
+  const filtered = useMemo(() => {
+    if (!search.trim()) return available
+    return available.filter(n => n.includes(search.trim()))
+  }, [available, search])
+
+  const toggle = (num: string) => {
+    if (selectedNumbers.includes(num)) {
+      onSelectedChange(selectedNumbers.filter(n => n !== num))
+    } else {
+      if (selectedNumbers.length >= quantity) {
+        onSelectedChange([...selectedNumbers.slice(1), num])
+      } else {
+        onSelectedChange([...selectedNumbers, num])
+      }
+    }
+  }
+
+  const clearAll = () => onSelectedChange([])
+
+  const autoFill = () => {
+    const pool = available.filter(n => !selectedNumbers.includes(n))
+    const need = quantity - selectedNumbers.length
+    const picks = pool.slice(0, need)
+    onSelectedChange([...selectedNumbers, ...picks])
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+      {/* Mode toggle */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+        <button
+          type="button"
+          onClick={() => { onModeChange('auto'); onSelectedChange([]) }}
+          style={{
+            padding: '10px 12px', borderRadius: 12, cursor: 'pointer',
+            border: selectionMode === 'auto' ? '2px solid #6366f1' : '2px solid rgba(255,255,255,0.08)',
+            background: selectionMode === 'auto' ? 'rgba(99,102,241,0.15)' : 'rgba(255,255,255,0.03)',
+            color: selectionMode === 'auto' ? '#a5b4fc' : '#6b7280',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
+            fontSize: 13, fontWeight: 700, transition: 'all 0.2s',
+          }}>
+          <Shuffle style={{ width: 14, height: 14, flexShrink: 0 }} />
+          Auto-Generate
+        </button>
+        <button
+          type="button"
+          onClick={() => onModeChange('manual')}
+          style={{
+            padding: '10px 12px', borderRadius: 12, cursor: 'pointer',
+            border: selectionMode === 'manual' ? '2px solid #8b5cf6' : '2px solid rgba(255,255,255,0.08)',
+            background: selectionMode === 'manual' ? 'rgba(139,92,246,0.15)' : 'rgba(255,255,255,0.03)',
+            color: selectionMode === 'manual' ? '#c4b5fd' : '#6b7280',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
+            fontSize: 13, fontWeight: 700, transition: 'all 0.2s',
+          }}>
+          <ListChecks style={{ width: 14, height: 14, flexShrink: 0 }} />
+          Pick Numbers
+        </button>
+      </div>
+
+      {/* Auto mode info */}
+      {selectionMode === 'auto' && (
+        <div style={{
+          padding: '12px 14px', borderRadius: 12,
+          background: 'rgba(99,102,241,0.07)', border: '1px solid rgba(99,102,241,0.18)',
+          display: 'flex', alignItems: 'center', gap: 10,
+        }}>
+          <Shuffle style={{ width: 16, height: 16, color: '#818cf8', flexShrink: 0 }} />
+          <div>
+            <p style={{ fontSize: 13, fontWeight: 600, color: '#a5b4fc', margin: '0 0 2px' }}>Lucky Draw</p>
+            <p style={{ fontSize: 12, color: '#6b7280', margin: 0 }}>
+              {quantity} ticket{quantity > 1 ? 's' : ''} will be randomly selected for you at the best available numbers.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Manual picker */}
+      {selectionMode === 'manual' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {/* Selection status bar */}
+          <div style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            padding: '10px 14px', borderRadius: 12,
+            background: selectedNumbers.length === quantity
+              ? 'rgba(52,211,153,0.08)' : 'rgba(255,255,255,0.03)',
+            border: selectedNumbers.length === quantity
+              ? '1px solid rgba(52,211,153,0.25)' : '1px solid rgba(255,255,255,0.08)',
+            transition: 'all 0.3s',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ fontSize: 20, fontWeight: 900, color: selectedNumbers.length === quantity ? '#34d399' : '#818cf8' }}>
+                {selectedNumbers.length}
+              </span>
+              <span style={{ fontSize: 12, color: '#6b7280' }}>/ {quantity} selected</span>
+              {selectedNumbers.length > 0 && (
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, maxWidth: 220 }}>
+                  {selectedNumbers.map(n => (
+                    <span key={n} style={{
+                      fontSize: 11, fontFamily: 'monospace', fontWeight: 700, padding: '2px 7px',
+                      borderRadius: 6, background: 'rgba(99,102,241,0.2)', color: '#a5b4fc',
+                      border: '1px solid rgba(99,102,241,0.3)',
+                    }}>{n}</span>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+              {selectedNumbers.length < quantity && available.length > 0 && (
+                <button type="button" onClick={autoFill}
+                  style={{ padding: '4px 10px', borderRadius: 8, fontSize: 11, fontWeight: 700, cursor: 'pointer', background: 'rgba(99,102,241,0.15)', border: '1px solid rgba(99,102,241,0.3)', color: '#818cf8', whiteSpace: 'nowrap' }}>
+                  Fill rest
+                </button>
+              )}
+              {selectedNumbers.length > 0 && (
+                <button type="button" onClick={clearAll}
+                  style={{ padding: '4px 8px', borderRadius: 8, fontSize: 11, fontWeight: 700, cursor: 'pointer', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', color: '#f87171' }}>
+                  <X style={{ width: 12, height: 12, display: 'block' }} />
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Search */}
+          <div style={{ position: 'relative' }}>
+            <Search style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', width: 14, height: 14, color: '#6b7280', pointerEvents: 'none' }} />
+            <input
+              type="text"
+              placeholder="Search ticket number…"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              className="input-dark"
+              style={{ paddingLeft: 36, width: '100%' }}
+            />
+          </div>
+
+          {/* Grid */}
+          {loadingNums ? (
+            <div style={{ textAlign: 'center', padding: '24px 0', color: '#6b7280', fontSize: 13 }}>
+              <Spinner />
+            </div>
+          ) : available.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '20px 0', color: '#6b7280', fontSize: 13 }}>
+              No available tickets to display.
+            </div>
+          ) : (
+            <div style={{
+              maxHeight: 260, overflowY: 'auto', borderRadius: 12,
+              border: '1px solid rgba(255,255,255,0.07)',
+              background: 'rgba(0,0,0,0.2)',
+              padding: 10,
+            }}>
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(62px, 1fr))',
+                gap: 6,
+              }}>
+                {filtered.map(num => {
+                  const sel = selectedNumbers.includes(num)
+                  return (
+                    <button
+                      key={num}
+                      type="button"
+                      onClick={() => toggle(num)}
+                      style={{
+                        height: 40, borderRadius: 10, fontSize: 12,
+                        fontFamily: 'monospace', fontWeight: 700, cursor: 'pointer',
+                        border: sel ? '2px solid #8b5cf6' : '1px solid rgba(255,255,255,0.1)',
+                        background: sel
+                          ? 'linear-gradient(135deg,rgba(99,102,241,0.4),rgba(139,92,246,0.35))'
+                          : 'rgba(255,255,255,0.04)',
+                        color: sel ? '#e9d5ff' : '#9ca3af',
+                        boxShadow: sel ? '0 0 10px rgba(139,92,246,0.3)' : 'none',
+                        transform: sel ? 'scale(1.05)' : 'scale(1)',
+                        transition: 'all 0.15s',
+                      }}>
+                      {num}
+                    </button>
+                  )
+                })}
+              </div>
+              {filtered.length === 0 && search && (
+                <p style={{ textAlign: 'center', color: '#4b5563', fontSize: 13, padding: '12px 0', margin: 0 }}>
+                  No ticket matching "{search}"
+                </p>
+              )}
+            </div>
+          )}
+
+          {selectedNumbers.length < quantity && (
+            <p style={{ fontSize: 11, color: '#fbbf24', margin: 0, display: 'flex', alignItems: 'center', gap: 5 }}>
+              <AlertCircle style={{ width: 12, height: 12, flexShrink: 0 }} />
+              Select {quantity - selectedNumbers.length} more ticket{quantity - selectedNumbers.length > 1 ? 's' : ''}, or use "Fill rest" to auto-complete.
+            </p>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
 const labelStyle: React.CSSProperties = {
   display: 'flex', alignItems: 'center', gap: 5,
   fontSize: 10.5, fontWeight: 700, color: '#6b7280',
@@ -149,6 +376,11 @@ export function OperatorLotteryDetail() {
   const [uploading, setUploading]   = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [copied, setCopied]         = useState(false)
+
+  // Ticket selection state
+  const [selectionMode, setSelectionMode] = useState<SelectionMode>('auto')
+  const [selectedNumbers, setSelectedNumbers] = useState<string[]>([])
+  const [confirmedNumbers, setConfirmedNumbers] = useState<string[]>([])
 
   const schema = z.object({
     buyerName:  z.string().min(2, t('lotteryDetail', 'nameRequired')),
@@ -189,23 +421,54 @@ export function OperatorLotteryDetail() {
 
   const onSubmit = async (d: F) => {
     if (!lot || submitting) return
+
+    // Validate manual selection is complete
+    if (selectionMode === 'manual' && selectedNumbers.length < d.quantity) {
+      toast.error(`Please select ${d.quantity} ticket number${d.quantity > 1 ? 's' : ''} before continuing.`)
+      return
+    }
+
     setSubmitting(true)
     try {
       const iKey = uid()
+
+      const reservePayload: Record<string, unknown> = {
+        lotteryId: lot.id,
+        quantity: d.quantity,
+        buyerName: d.buyerName,
+        buyerPhone: d.buyerPhone,
+        buyerEmail: undefined,
+        idempotencyKey: iKey,
+      }
+      if (selectionMode === 'manual' && selectedNumbers.length === d.quantity) {
+        reservePayload.ticketNumbers = selectedNumbers
+      }
+
       let resId: string
+      let reservationData: Record<string, unknown>
       try {
-        const res = await ticketsApi.reserve({ lotteryId: lot.id, quantity: d.quantity, buyerName: d.buyerName, buyerPhone: d.buyerPhone, buyerEmail: undefined, idempotencyKey: iKey })
-        resId = res.data?.data?.id ?? res.data?.id
+        const res = await ticketsApi.reserve(reservePayload)
+        reservationData = res.data?.data ?? res.data
+        resId = reservationData?.id as string
       } catch (e: any) {
         if (e?.response?.status === 409) {
           const ex = e.response.data?.data ?? e.response.data
+          reservationData = ex ?? {}
           resId = ex?.id ?? ex?.reservationId
           if (!resId) throw new Error(t('lotteryDetail', 'reserveError'))
         } else throw e
       }
+
       let pd: Record<string, unknown>
       try {
-        const pay = await paymentsApi.initiate({ lotteryId: lot.id, reservationId: resId!, buyerName: d.buyerName, buyerPhone: d.buyerPhone, buyerEmail: undefined, idempotencyKey: iKey + '-pay' })
+        const pay = await paymentsApi.initiate({
+          lotteryId: lot.id,
+          reservationId: resId!,
+          buyerName: d.buyerName,
+          buyerPhone: d.buyerPhone,
+          buyerEmail: undefined,
+          idempotencyKey: iKey + '-pay',
+        })
         pd = pay.data?.data ?? pay.data
       } catch (e: any) {
         if (e?.response?.status === 409) {
@@ -213,6 +476,13 @@ export function OperatorLotteryDetail() {
           if (!pd.id) throw new Error(t('lotteryDetail', 'reserveError'))
         } else throw e
       }
+
+      // Capture the actual ticket numbers returned from the server
+      const reserved: string[] = ((reservationData! as any)?.tickets ?? [])
+        .map((tk: any) => tk.ticketNumber as string)
+        .filter(Boolean)
+
+      setConfirmedNumbers(reserved.length > 0 ? reserved : selectedNumbers)
       setPaymentId(pd!.id as string)
       setRefCode(pd!.referenceCode as string)
       setTotalAmount(qty * ticketPrice)
@@ -403,12 +673,33 @@ export function OperatorLotteryDetail() {
                     {errors.buyerPhone && <p style={{ fontSize: 12, color: '#f87171', marginTop: 4 }}>{errors.buyerPhone.message}</p>}
                   </div>
                 </div>
+
                 {/* Quantity */}
                 <div>
                   <label style={labelStyle}><Icon><Hash style={{ width: 11, height: 11 }} /></Icon>{t('lotteryDetail', 'numTickets')}</label>
-                  <input className="input-dark" type="number" min={1} max={50} {...register('quantity')} />
+                  <input className="input-dark" type="number" min={1} max={50}
+                    {...register('quantity', { onChange: () => setSelectedNumbers([]) })} />
                   {errors.quantity && <p style={{ fontSize: 12, color: '#f87171', marginTop: 4 }}>{errors.quantity.message}</p>}
                 </div>
+
+                {/* Ticket selection */}
+                <div>
+                  <label style={{ ...labelStyle, marginBottom: 10 }}>
+                    <Icon><Ticket style={{ width: 11, height: 11 }} /></Icon>
+                    Ticket Numbers
+                  </label>
+                  {lot?.id && (
+                    <TicketPicker
+                      lotteryId={lot.id as string}
+                      quantity={qty}
+                      selectionMode={selectionMode}
+                      onModeChange={setSelectionMode}
+                      selectedNumbers={selectedNumbers}
+                      onSelectedChange={setSelectedNumbers}
+                    />
+                  )}
+                </div>
+
                 {/* Total */}
                 <div style={{ borderRadius: 16, padding: '16px 18px', background: 'linear-gradient(135deg,rgba(79,70,229,0.18),rgba(124,58,237,0.12))', border: '1px solid rgba(99,102,241,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <div>
@@ -418,6 +709,7 @@ export function OperatorLotteryDetail() {
                   </div>
                   <Ticket style={{ width: 44, height: 44, color: 'rgba(99,102,241,0.25)', display: 'block' }} />
                 </div>
+
                 {/* Buttons */}
                 <div style={{ display: 'flex', gap: 10 }}>
                   <button type="button" onClick={() => setStep('prizes')}
@@ -444,6 +736,24 @@ export function OperatorLotteryDetail() {
                 <Icon><Banknote style={{ width: 19, height: 19, color: '#34d399' }} /></Icon>
                 {t('lotteryDetail', 'completePayment')}
               </h2>
+
+              {/* Reserved ticket numbers */}
+              {confirmedNumbers.length > 0 && (
+                <div style={{ padding: '12px 14px', borderRadius: 12, background: 'rgba(99,102,241,0.07)', border: '1px solid rgba(99,102,241,0.2)' }}>
+                  <p style={{ fontSize: 10, color: '#6b7280', margin: '0 0 8px', textTransform: 'uppercase', letterSpacing: '0.07em', fontWeight: 700 }}>
+                    Your Reserved Ticket{confirmedNumbers.length > 1 ? 's' : ''}
+                  </p>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                    {confirmedNumbers.map(n => (
+                      <span key={n} style={{
+                        fontSize: 13, fontFamily: 'monospace', fontWeight: 800, padding: '4px 10px',
+                        borderRadius: 8, background: 'rgba(99,102,241,0.25)', color: '#a5b4fc',
+                        border: '1px solid rgba(99,102,241,0.4)',
+                      }}>#{n}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* Amount + Bank side by side */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }} className="payment-amounts">
@@ -506,6 +816,29 @@ export function OperatorLotteryDetail() {
               </div>
 
               <div style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 14 }}>
+                {/* Ticket numbers */}
+                {confirmedNumbers.length > 0 && (
+                  <div style={{ borderRadius: 14, background: 'rgba(16,185,129,0.07)', border: '1px solid rgba(52,211,153,0.2)', padding: '14px 16px' }}>
+                    <p style={{ fontSize: 10, color: '#6b7280', margin: '0 0 10px', textTransform: 'uppercase', letterSpacing: '0.08em', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 5 }}>
+                      <Ticket style={{ width: 11, height: 11, color: '#34d399' }} />
+                      Your Ticket Number{confirmedNumbers.length > 1 ? 's' : ''}
+                    </p>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                      {confirmedNumbers.map(n => (
+                        <div key={n} style={{
+                          padding: '8px 14px', borderRadius: 10,
+                          background: 'linear-gradient(135deg,rgba(52,211,153,0.15),rgba(16,185,129,0.1))',
+                          border: '1px solid rgba(52,211,153,0.3)',
+                          display: 'flex', alignItems: 'center', gap: 6,
+                        }}>
+                          <span style={{ fontSize: 10, color: '#6b7280' }}>#</span>
+                          <span style={{ fontFamily: 'monospace', fontSize: 16, fontWeight: 900, color: '#34d399', letterSpacing: '0.05em' }}>{n}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 {/* Ref code */}
                 <div style={{ borderRadius: 14, background: 'rgba(99,102,241,0.07)', border: '1px solid rgba(99,102,241,0.2)', padding: '14px 16px' }}>
                   <p style={{ fontSize: 10, color: '#6b7280', margin: '0 0 8px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{t('lotteryDetail', 'yourRefCode')}</p>
@@ -529,7 +862,7 @@ export function OperatorLotteryDetail() {
                     style={{ height: 50, fontSize: 15, borderRadius: 14, justifyContent: 'center' }}>
                     <ExternalLink style={{ width: 16, height: 16, display: 'block' }} />{t('lotteryDetail', 'trackPayment')}
                   </Link>
-                  <button onClick={() => { setStep('prizes'); setSlipFile(null) }} className="btn-secondary"
+                  <button onClick={() => { setStep('prizes'); setSlipFile(null); setSelectedNumbers([]); setConfirmedNumbers([]) }} className="btn-secondary"
                     style={{ height: 46, fontSize: 14, borderRadius: 14 }}>
                     <Ticket style={{ width: 16, height: 16, display: 'block' }} />{t('lotteryDetail', 'buyMore')}
                   </button>
