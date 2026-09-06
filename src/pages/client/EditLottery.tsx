@@ -130,7 +130,7 @@ export function ClientEditLottery() {
   } = useForm<F>({
     resolver: zodResolver(schema),
     defaultValues: {
-      type: 'STANDARD', visibility: 'PUBLIC',
+      visibility: 'PUBLIC',
       prizes: [{ rank: 1, title: 'First Prize', prizeValue: 0, quantity: 1 }],
     },
   })
@@ -242,7 +242,7 @@ export function ClientEditLottery() {
         </div>
       </div>
 
-      <form onSubmit={handleSubmit(d => mut.mutate(d))} className="space-y-5">
+      <form onSubmit={handleSubmit((d: F) => mut.mutate(d))} className="space-y-5">
 
         {/* Basic Info + Tickets & Pricing — side by side */}
         <div className="grid grid-cols-2 gap-5 items-start">

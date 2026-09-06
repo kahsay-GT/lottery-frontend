@@ -66,8 +66,16 @@ export function CardSlider({ images, gradientClass = 'from-indigo-900/80 via-pur
           key={img.id}
           src={resolveUrl(img.url)}
           alt={`${alt} ${i + 1}`}
-          className="absolute inset-0 w-full h-full object-cover transition-opacity duration-700"
-          style={{ opacity: i === idx ? 1 : 0, zIndex: i === idx ? 1 : 0 }}
+          loading={i === 0 ? 'eager' : 'lazy'}
+          decoding="async"
+          className="absolute inset-0 w-full h-full transition-opacity duration-700"
+          style={{
+            opacity: i === idx ? 1 : 0,
+            zIndex: i === idx ? 1 : 0,
+            objectFit: 'contain',
+            objectPosition: 'center center',
+            imageRendering: 'auto',
+          }}
           draggable={false}
         />
       ))}
@@ -180,13 +188,18 @@ export function DetailSlider({ images, banner, alt = 'Lottery' }: DetailSliderPr
           key={img.id}
           src={resolveUrl(img.url)}
           alt={`${alt} ${i + 1}`}
+          fetchPriority={i === 0 ? 'high' : 'low'}
+          loading={i === 0 ? 'eager' : 'lazy'}
+          decoding={i === 0 ? 'sync' : 'async'}
           style={{
             position: 'absolute', inset: 0,
             width: '100%', height: '100%',
-            objectFit: 'cover',
+            objectFit: 'contain',
+            objectPosition: 'center center',
             opacity: i === idx ? 1 : 0,
             transition: 'opacity 0.7s ease',
             display: 'block',
+            imageRendering: 'auto',
           }}
           draggable={false}
           onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none' }}
