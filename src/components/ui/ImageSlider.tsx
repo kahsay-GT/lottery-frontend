@@ -178,7 +178,7 @@ export function DetailSlider({ images, banner, alt = 'Lottery' }: DetailSliderPr
 
   return (
     <div
-      style={{ position: 'absolute', inset: 0, overflow: 'hidden' }}
+      style={{ position: 'absolute', inset: 0, overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
@@ -192,14 +192,15 @@ export function DetailSlider({ images, banner, alt = 'Lottery' }: DetailSliderPr
           loading={i === 0 ? 'eager' : 'lazy'}
           decoding={i === 0 ? 'sync' : 'async'}
           style={{
-            position: 'absolute', inset: 0,
-            width: '100%', height: '100%',
-            objectFit: 'contain',
-            objectPosition: 'center center',
+            position: 'absolute',
+            width: 'auto',
+            height: 'auto',
+            maxWidth: '100%',
+            maxHeight: '100%',
+            objectFit: 'scale-down',
             opacity: i === idx ? 1 : 0,
             transition: 'opacity 0.7s ease',
             display: 'block',
-            imageRendering: 'auto',
           }}
           draggable={false}
           onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none' }}
