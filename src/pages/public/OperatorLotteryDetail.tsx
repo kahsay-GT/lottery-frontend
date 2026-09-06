@@ -557,6 +557,7 @@ export function OperatorLotteryDetail() {
         {/* ── LEFT col: sticky image (desktop only) ─────────────────────── */}
         <div className="lot-detail-image">
           <div style={{ position: 'sticky', top: 52, height: 'calc(100vh - 52px)', overflow: 'hidden', background: '#08090f' }}>
+            <div style={{ position: 'relative', width: '100%', height: '100%' }}>
             <DetailSlider images={sliderImages} banner={lot.banner as string | null} alt={lot.name as string} />
             {sliderImages.length === 0 && (
               <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg,#1e1b4b,#312e81,#4c1d95)', zIndex: 0 }} />
@@ -598,6 +599,7 @@ export function OperatorLotteryDetail() {
                   transition: 'width 1.2s ease',
                 }} />
               </div>
+            </div>
             </div>
           </div>
         </div>

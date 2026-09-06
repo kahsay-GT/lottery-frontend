@@ -517,6 +517,7 @@ export function LotteryDetail() {
         {/* ── LEFT col: sticky image (desktop only) ─────────────────────── */}
         <div className="lot-detail-image">
           <div style={{ position: 'sticky', top: 52, height: 'calc(100vh - 52px)', overflow: 'hidden', background: '#08090f' }}>
+            <div style={{ position: 'relative', width: '100%', height: '100%' }}>
             <DetailSlider images={sliderImages} banner={lot.banner as string | null} alt={lot.name as string} />
             {sliderImages.length === 0 && (
               <>
@@ -553,6 +554,7 @@ export function LotteryDetail() {
                   transition: 'width 1s ease',
                 }} />
               </div>
+            </div>
             </div>
           </div>
         </div>

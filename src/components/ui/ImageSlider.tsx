@@ -72,9 +72,8 @@ export function CardSlider({ images, gradientClass = 'from-indigo-900/80 via-pur
           style={{
             opacity: i === idx ? 1 : 0,
             zIndex: i === idx ? 1 : 0,
-            objectFit: 'contain',
+            objectFit: 'cover',
             objectPosition: 'center center',
-            imageRendering: 'auto',
           }}
           draggable={false}
         />
@@ -85,7 +84,7 @@ export function CardSlider({ images, gradientClass = 'from-indigo-900/80 via-pur
         className="absolute inset-0 pointer-events-none"
         style={{
           zIndex: 2,
-          background: 'linear-gradient(to top, rgba(8,9,15,0.85) 0%, rgba(8,9,15,0.2) 50%, transparent 100%)',
+          background: 'linear-gradient(to top, rgba(0,0,0,0.45) 0%, transparent 50%, transparent 100%)',
         }}
       />
 
@@ -178,7 +177,7 @@ export function DetailSlider({ images, banner, alt = 'Lottery' }: DetailSliderPr
 
   return (
     <div
-      style={{ position: 'absolute', inset: 0, overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+      style={{ position: 'absolute', inset: 0, overflow: 'hidden' }}
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
@@ -193,11 +192,11 @@ export function DetailSlider({ images, banner, alt = 'Lottery' }: DetailSliderPr
           decoding={i === 0 ? 'sync' : 'async'}
           style={{
             position: 'absolute',
-            width: 'auto',
-            height: 'auto',
-            maxWidth: '100%',
-            maxHeight: '100%',
-            objectFit: 'scale-down',
+            inset: 0,
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            objectPosition: 'center center',
             opacity: i === idx ? 1 : 0,
             transition: 'opacity 0.7s ease',
             display: 'block',
@@ -207,11 +206,11 @@ export function DetailSlider({ images, banner, alt = 'Lottery' }: DetailSliderPr
         />
       ))}
 
-      {/* Overlay gradient */}
+      {/* Overlay gradient — only at the very bottom for text legibility */}
       <div
         style={{
           position: 'absolute', inset: 0, pointerEvents: 'none',
-          background: 'linear-gradient(to bottom, rgba(3,4,12,0.3) 0%, rgba(3,4,12,0.7) 65%, #08090f 100%)',
+          background: 'linear-gradient(to bottom, transparent 0%, transparent 50%, rgba(0,0,0,0.45) 100%)',
           zIndex: 2,
         }}
       />
