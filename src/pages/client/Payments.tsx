@@ -716,7 +716,7 @@ function BulkImportModal({
                   <label className="text-xs font-semibold text-gray-400">Buyers ({rows.length})</label>
                   {ticketPrice > 0 && totalQty > 0 && (
                     <span className="text-xs text-indigo-300 font-semibold">
-                      Total: {totalQty} ticket{totalQty !== 1 ? 's' : ''} · {totalAmt.toLocaleString()} ETB
+                      Total: {totalQty} ticket{totalQty !== 1 ? 's' : ''} · {fmt$(totalAmt)}
                     </span>
                   )}
                 </div>

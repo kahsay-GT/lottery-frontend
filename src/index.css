@@ -681,3 +681,31 @@ html.light * {
 @media (max-width: 767px) {
   .public-page { padding-bottom: 80px !important; }
 }
+
+/* ── Prize pool card title — white in dark mode, black in light mode ─────── */
+.prize-title { color: #fff; }
+html.light .prize-title { color: #111827; }
+
+/* ── Ticket controls row: qty + mode buttons on one line (desktop) ──────── */
+.ticket-controls-row {
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+}
+.ticket-qty-field {
+  flex: 0 0 160px;
+  min-width: 0;
+}
+.ticket-mode-btns {
+  flex: 1;
+  min-width: 0;
+}
+@media (max-width: 767px) {
+  .ticket-controls-row {
+    flex-direction: column;
+  }
+  .ticket-qty-field {
+    flex: none;
+    width: 100%;
+  }
+}

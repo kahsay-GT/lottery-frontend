@@ -323,11 +323,11 @@ function TicketPicker({ lotteryId, quantity, selectionMode, onModeChange, select
                       style={{
                         height: 40, borderRadius: 10, fontSize: 12,
                         fontFamily: 'monospace', fontWeight: 700, cursor: 'pointer',
-                        border: sel ? '2px solid #8b5cf6' : '1px solid rgba(255,255,255,0.1)',
+                        border: sel ? '2px solid #8b5cf6' : '1px solid rgba(255,255,255,0.15)',
                         background: sel
                           ? 'linear-gradient(135deg,rgba(99,102,241,0.4),rgba(139,92,246,0.35))'
-                          : 'rgba(255,255,255,0.04)',
-                        color: sel ? '#e9d5ff' : '#9ca3af',
+                          : 'rgba(255,255,255,0.08)',
+                        color: sel ? '#e9d5ff' : '#d1d5db',
                         boxShadow: sel ? '0 0 10px rgba(139,92,246,0.3)' : 'none',
                         transform: sel ? 'scale(1.05)' : 'scale(1)',
                         transition: 'all 0.15s',
@@ -673,13 +673,13 @@ export function OperatorLotteryDetail() {
                     {t('lotteryDetail', 'prizePool')}
                   </h2>
                   {prizes.length > 0 ? prizes.map((p, i) => (
-                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px', borderRadius: 12, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', marginBottom: 8 }}>
+                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px', borderRadius: 12, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', marginBottom: 8 }}>
                       <span style={{ fontSize: 20, flexShrink: 0 }}>{['🥇', '🥈', '🥉'][i] ?? '🏅'}</span>
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <p style={{ fontSize: 13, fontWeight: 600, color: '#fff', margin: '0 0 1px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.title as string}</p>
-                        <p style={{ fontSize: 12, color: '#fde68a', margin: 0 }}>{fmt$(Number(p.prizeValue ?? 0))}</p>
+                        <p className="prize-title" style={{ fontSize: 13, fontWeight: 600, margin: '0 0 1px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.title as string}</p>
+                        <p style={{ fontSize: 18, fontWeight: 800, color: '#f59e0b', margin: 0 }}>{fmt$(Number(p.prizeValue ?? 0))}</p>
                       </div>
-                      {Number(p.quantity ?? 1) > 1 && <span style={{ fontSize: 11, color: '#6b7280', flexShrink: 0 }}>×{Number(p.quantity)}</span>}
+                      {Number(p.quantity ?? 1) > 1 && <span style={{ fontSize: 11, color: '#9ca3af', flexShrink: 0 }}>×{Number(p.quantity)}</span>}
                     </div>
                   )) : (
                     <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: 14, borderRadius: 12, background: 'rgba(234,179,8,0.06)', border: '1px solid rgba(234,179,8,0.18)', marginBottom: 8 }}>

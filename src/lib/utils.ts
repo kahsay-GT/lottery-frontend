@@ -6,8 +6,8 @@ export const cn = (...c: ClassValue[]) => twMerge(clsx(c))
 /** Format a number as Ethiopian Birr — used everywhere in the app */
 export const fmt$ = (n: number) => {
   const formatted = new Intl.NumberFormat('en-ET', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
   }).format(n)
   return `ETB ${formatted}`
 }

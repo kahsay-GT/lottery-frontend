@@ -6,7 +6,7 @@ import {
   CreditCard, FileText, UserCheck,
 } from 'lucide-react'
 import { adminApi } from '../../lib/api'
-import { fmtDateTime } from '../../lib/utils'
+import { fmt$, fmtDateTime } from '../../lib/utils'
 import { Spinner } from '../../components/ui/Spinner'
 
 type ActionType = 'APPROVE' | 'REJECT' | 'all'
@@ -283,7 +283,7 @@ function LogRow({ log }: { log: ApprovalLog }) {
         const obj = val as Record<string, unknown>
         // Show relevant fields based on entity type
         if (obj.name) return String(obj.name)
-        if (obj.amount) return `$${Number(obj.amount).toLocaleString()}`
+        if (obj.amount) return fmt$(Number(obj.amount))
         if (obj.status) return String(obj.status)
         return JSON.stringify(obj).substring(0, 50)
       }
