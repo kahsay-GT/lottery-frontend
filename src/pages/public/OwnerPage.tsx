@@ -99,13 +99,13 @@ function LotteryCard({ lot, username, closed=false }: { lot: LotteryRow; usernam
               <img src={lot.banner} alt={lot.name} style={{width:'100%',height:'100%',objectFit:'cover',display:'block',opacity:closed?0.6:1}}/>
               <div style={{position:'absolute',inset:0,background:'linear-gradient(to bottom,rgba(0,0,0,0.15) 0%,rgba(0,0,0,0.65) 100%)'}}/>
               <div style={{position:'absolute',bottom:9,left:14,right:14,display:'flex',alignItems:'flex-end',justifyContent:'space-between',gap:8}}>
-                <div style={{minWidth:0}}><h3 style={{fontSize:15,fontWeight:700,color:'#fff',margin:'0 0 2px',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',textShadow:'0 1px 4px rgba(0,0,0,0.6)'}}>{lot.name}</h3><p style={{fontSize:11,color:'rgba(255,255,255,0.6)',margin:0}}>{lot.type.replace(/_/g,' ')}</p></div>
+                <div style={{minWidth:0}}><h3 style={{fontSize:15,fontWeight:700,color:'#fff',margin:0,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',textShadow:'0 1px 4px rgba(0,0,0,0.6)'}}>{lot.name}</h3></div>
                 <StatusBadge status={lot.status}/>
               </div>
             </>
           ) : (
             <div style={{padding:'14px 18px 12px',background:closed?'rgba(107,114,128,0.08)':'rgba(99,102,241,0.07)',borderBottom:'1px solid rgba(255,255,255,0.05)',display:'flex',alignItems:'flex-start',justifyContent:'space-between',gap:10}}>
-              <div style={{minWidth:0}}><h3 style={{fontSize:15,fontWeight:700,color:'#f3f4f6',margin:'0 0 3px',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{lot.name}</h3><p style={{fontSize:11.5,color:'#6b7280',margin:0}}>{lot.type.replace(/_/g,' ')}</p></div>
+              <div style={{minWidth:0}}><h3 style={{fontSize:15,fontWeight:700,color:'#f3f4f6',margin:0,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{lot.name}</h3></div>
               <StatusBadge status={lot.status}/>
             </div>
           )}

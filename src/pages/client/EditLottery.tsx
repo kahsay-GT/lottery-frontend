@@ -26,7 +26,6 @@ const prizeSchema = z.object({
 const schema = z.object({
   name:            z.string().min(3, 'At least 3 characters'),
   description:     z.string().optional(),
-  type:            z.enum(['STANDARD', 'RAFFLE', 'SCRATCH_CARD', 'INSTANT_WIN']),
   ticketPrice:     z.coerce.number().min(0.01, 'Must be > 0'),
   totalTickets:    z.coerce.number().int().min(1, 'Min 1'),
   ticketStart:     z.coerce.number().int().min(1, 'Min 1').optional(),
@@ -149,7 +148,6 @@ export function ClientEditLottery() {
     reset({
       name:            String(lot.name ?? ''),
       description:     String(lot.description ?? ''),
-      type:            (lot.type as F['type']) ?? 'STANDARD',
       ticketPrice:     Number(lot.ticketPrice ?? 0),
       totalTickets:    Number(lot.totalTickets ?? 0),
       ticketStart:     Number(lot.ticketStart ?? 1),
@@ -256,23 +254,13 @@ export function ClientEditLottery() {
               error={errors.name?.message} {...register('name')} />
             <Textarea label="Description" placeholder="Describe your lottery…"
               {...register('description')} />
-            <div className="grid grid-cols-2 gap-4">
-              <Select label="Type *"
-                options={[
-                  { value: 'STANDARD',     label: 'Standard' },
-                  { value: 'RAFFLE',       label: 'Raffle' },
-                  { value: 'SCRATCH_CARD', label: 'Scratch Card' },
-                  { value: 'INSTANT_WIN',  label: 'Instant Win' },
-                ]}
-                {...register('type')} />
-              <Select label="Visibility *"
-                options={[
-                  { value: 'PUBLIC',   label: 'Public' },
-                  { value: 'PRIVATE',  label: 'Private' },
-                  { value: 'UNLISTED', label: 'Unlisted' },
-                ]}
-                {...register('visibility')} />
-            </div>
+            <Select label="Visibility *"
+              options={[
+                { value: 'PUBLIC',   label: 'Public' },
+                { value: 'PRIVATE',  label: 'Private' },
+                { value: 'UNLISTED', label: 'Unlisted' },
+              ]}
+              {...register('visibility')} />
           </div>
 
           {/* Tickets & Pricing */}

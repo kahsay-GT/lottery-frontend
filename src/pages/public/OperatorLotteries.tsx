@@ -80,8 +80,7 @@ function LotteryCard({ lot, username }: { lot: LotteryRow; username: string }) {
           {/* Name + type + status overlaid on the bottom */}
           <div style={{position:'absolute',bottom:0,left:0,right:0,padding:'32px 16px 10px',background:'linear-gradient(to top,rgba(8,9,15,0.9) 0%,transparent 100%)',zIndex:4,display:'flex',alignItems:'flex-end',justifyContent:'space-between',gap:10}}>
             <div style={{minWidth:0}}>
-              <h3 style={{fontSize:15,fontWeight:700,color:'#fff',margin:'0 0 2px',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',textShadow:'0 1px 4px rgba(0,0,0,0.7)'}}>{lot.name}</h3>
-              <p style={{fontSize:11,color:'rgba(255,255,255,0.55)',margin:0}}>{lot.type.replace('_',' ')}</p>
+              <h3 style={{fontSize:15,fontWeight:700,color:'#fff',margin:0,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',textShadow:'0 1px 4px rgba(0,0,0,0.7)'}}>{lot.name}</h3>
             </div>
             <StatusBadge status={lot.status}/>
           </div>

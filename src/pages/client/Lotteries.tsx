@@ -8,7 +8,7 @@ import { fmt$, fmtDate, daysLeft } from '../../lib/utils'
 import { DataTable } from '../../components/ui/DataTable'
 import { StatusBadge } from '../../components/ui/Badge'
 
-interface LotteryRow { id: string; name: string; type: string; ticketPrice: number; totalTickets: number; ticketsSold: number; status: string; drawDate: string; saleEndDate: string }
+interface LotteryRow { id: string; name: string; ticketPrice: number; totalTickets: number; ticketsSold: number; status: string; drawDate: string; saleEndDate: string }
 
 export function ClientLotteries() {
   const qc = useQueryClient()

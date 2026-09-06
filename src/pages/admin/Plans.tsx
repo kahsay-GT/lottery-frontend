@@ -34,7 +34,6 @@ interface Plan {
   supportLevel: string
   sortOrder: number
   isActive: boolean
-  lotteryTypesAllowed: string[]
 }
 
 // ─── Schema ───────────────────────────────────────────────────────────────────
@@ -53,11 +52,9 @@ const planSchema = z.object({
   hasApiAccess:          z.boolean(),
   supportLevel:          z.string().min(1),
   sortOrder:             z.coerce.number().int().min(0),
-  lotteryTypesAllowed:   z.array(z.string()).min(1, 'Select at least one type'),
 })
 type PlanForm = z.infer<typeof planSchema>
 
-const LOTTERY_TYPES = ['STANDARD', 'RAFFLE', 'SCRATCH_CARD', 'INSTANT_WIN']
 const PLAN_ICONS = [
   { icon: Zap,    bg: 'bg-blue-500/20',   text: 'text-blue-400' },
   { icon: Star,   bg: 'bg-purple-500/20', text: 'text-purple-400' },
@@ -71,7 +68,6 @@ const DEFAULT_PLAN_FORM: PlanForm = {
   maxTicketsPerLottery: 5000, minTicketPrice: 1, maxTicketPrice: 1000,
   storageQuotaGb: 10, hasReporting: true, hasApiAccess: false,
   supportLevel: 'basic', sortOrder: 0,
-  lotteryTypesAllowed: ['STANDARD'],
 }
 
 function planToForm(p: Plan): PlanForm {
@@ -90,7 +86,6 @@ function planToForm(p: Plan): PlanForm {
     hasApiAccess:         Boolean(p.hasApiAccess),
     supportLevel:         p.supportLevel ?? 'basic',
     sortOrder:            Number(p.sortOrder) || 0,
-    lotteryTypesAllowed:  p.lotteryTypesAllowed ?? ['STANDARD'],
   }
 }
 
@@ -188,15 +183,6 @@ function PlanCard({
           ))}
         </ul>
 
-        {/* Lottery types */}
-        <div className="flex flex-wrap gap-1.5">
-          {(plan.lotteryTypesAllowed ?? []).map(t => (
-            <span key={t} className="text-xs px-2 py-0.5 rounded-full bg-primary-600/20 text-primary-300 border border-primary-500/20">
-              {t.replace('_', ' ')}
-            </span>
-          ))}
-        </div>
-
         {/* Status badge */}
         <div className={`text-center py-1.5 rounded-xl text-xs font-semibold ${
           isActive
@@ -221,7 +207,7 @@ function PlanFormModal({
   const qc = useQueryClient()
   const isEdit = Boolean(editPlan)
 
-  const { register, handleSubmit, reset, setValue, watch, formState: { errors, isSubmitting } } = useForm<PlanForm>({
+  const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<PlanForm>({
     resolver: zodResolver(planSchema),
     defaultValues: DEFAULT_PLAN_FORM,
   })
@@ -232,16 +218,6 @@ function PlanFormModal({
       reset(editPlan ? planToForm(editPlan) : DEFAULT_PLAN_FORM)
     }
   }, [open, editPlan, reset])
-
-  const selectedTypes = watch('lotteryTypesAllowed') ?? []
-
-  const toggleType = (t: string) => {
-    setValue(
-      'lotteryTypesAllowed',
-      selectedTypes.includes(t) ? selectedTypes.filter(x => x !== t) : [...selectedTypes, t],
-      { shouldValidate: true },
-    )
-  }
 
   const createMut = useMutation({
     mutationFn: (d: PlanForm) => plansApi.adminCreate(d),
@@ -337,27 +313,6 @@ function PlanFormModal({
             <input type="checkbox" className="w-4 h-4 rounded accent-primary-500" {...register('hasApiAccess')} />
             <span className="text-sm text-gray-300">API Access</span>
           </label>
-        </div>
-
-        {/* Lottery types */}
-        <div>
-          <label className="label">Allowed Lottery Types *</label>
-          {errors.lotteryTypesAllowed && (
-            <p className="text-xs text-red-400 mb-2">{errors.lotteryTypesAllowed.message as string}</p>
-          )}
-          <div className="flex flex-wrap gap-2">
-            {LOTTERY_TYPES.map(t => (
-              <button key={t} type="button" onClick={() => toggleType(t)}
-                className={`px-3 py-1.5 rounded-xl text-sm font-medium border transition-all ${
-                  selectedTypes.includes(t)
-                    ? 'bg-primary-600/30 text-primary-300 border-primary-500/40'
-                    : 'bg-white/4 text-gray-400 border-white/10 hover:border-white/25'
-                }`}>
-                {selectedTypes.includes(t) && <CheckCircle2 className="w-3.5 h-3.5 inline mr-1.5" />}
-                {t.replace('_', ' ')}
-              </button>
-            ))}
-          </div>
         </div>
 
         {/* Submit */}
