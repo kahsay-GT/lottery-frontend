@@ -5,6 +5,7 @@ import {
   Settings, LogOut, ChevronLeft, ChevronRight, Package,
   Trophy, Menu, X, UserCog,
 } from 'lucide-react'
+import { Logo } from '../components/ui/Logo'
 import { useQuery } from '@tanstack/react-query'
 import { useClientAuth, useStaffAuth } from '../store/auth'
 import { authApi, reportsApi } from '../lib/api'
@@ -208,9 +209,7 @@ export function ClientLayout() {
           borderBottom: '1px solid var(--border)', flexShrink: 0,
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{ width: 28, height: 28, borderRadius: 8, background: isStaff ? 'linear-gradient(135deg,#059669,#10b981)' : 'linear-gradient(135deg,#4f46e5,#7c3aed)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              {isStaff ? <Users className="w-3.5 h-3.5 text-white" /> : <Ticket className="w-3.5 h-3.5 text-white" />}
-            </div>
+            <Logo height={32} />
             <div>
               <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>{isStaff ? 'Staff Panel' : 'Operator'}</p>
               <p style={{ fontSize: 10.5, color: 'var(--text-muted)', margin: 0 }}>{user?.businessName ?? user?.name}</p>
@@ -239,9 +238,7 @@ export function ClientLayout() {
           {!collapsed ? (
             <>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
-                <div style={{ width: 28, height: 28, borderRadius: 8, background: isStaff ? 'linear-gradient(135deg,#059669,#10b981)' : 'linear-gradient(135deg,#4f46e5,#7c3aed)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  {isStaff ? <Users className="w-3.5 h-3.5 text-white" /> : <Ticket className="w-3.5 h-3.5 text-white" />}
-                </div>
+                <Logo height={32} style={{ flexShrink: 0 }} />
                 <div style={{ minWidth: 0 }}>
                   <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                     {isStaff ? 'Staff Panel' : 'Operator Panel'}
@@ -256,9 +253,7 @@ export function ClientLayout() {
               </button>
             </>
           ) : (
-            <div style={{ width: 28, height: 28, borderRadius: 8, background: isStaff ? 'linear-gradient(135deg,#059669,#10b981)' : 'linear-gradient(135deg,#4f46e5,#7c3aed)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto' }}>
-              {isStaff ? <Users className="w-3.5 h-3.5 text-white" /> : <Ticket className="w-3.5 h-3.5 text-white" />}
-            </div>
+            <Logo height={32} style={{ margin: '0 auto' }} />
           )}
         </div>
 
@@ -284,9 +279,7 @@ export function ClientLayout() {
             <Menu className="w-5 h-5" />
           </button>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 0 }}>
-            <div style={{ width: 26, height: 26, borderRadius: 7, background: isStaff ? 'linear-gradient(135deg,#059669,#10b981)' : 'linear-gradient(135deg,#4f46e5,#7c3aed)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-              {isStaff ? <Users className="w-3.5 h-3.5 text-white" /> : <Ticket className="w-3.5 h-3.5 text-white" />}
-            </div>
+            <Logo height={28} style={{ flexShrink: 0 }} />
             <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>{isStaff ? 'Staff Panel' : 'Operator Panel'}</span>
           </div>
           <ThemeToggle size={30} />

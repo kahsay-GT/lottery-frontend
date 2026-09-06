@@ -4,10 +4,11 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useNavigate, Link } from 'react-router-dom'
 import { toast } from 'sonner'
-import { Eye, EyeOff, ShieldCheck, ArrowRight, Phone } from 'lucide-react'
+import { Eye, EyeOff, ArrowRight, Phone } from 'lucide-react'
 import { authApi, getErr } from '../../lib/api'
 import { useAdminAuth } from '../../store/auth'
 import { Spinner } from '../../components/ui/Spinner'
+import { Logo } from '../../components/ui/Logo'
 
 const schema = z.object({
   identifier: z
@@ -71,14 +72,7 @@ export function AdminLoginPage() {
 
         {/* Logo */}
         <div style={{ textAlign: 'center' }}>
-          <div style={{
-            width: 56, height: 56, borderRadius: 16,
-            background: 'linear-gradient(135deg,#dc2626,#b91c1c)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            margin: '0 auto 14px', boxShadow: '0 8px 24px rgba(220,38,38,0.25)',
-          }}>
-            <ShieldCheck className="w-7 h-7 text-white" />
-          </div>
+          <Logo height={80} style={{ margin: '0 auto 16px' }} />
           <h1 style={{ fontSize: 'clamp(22px,6vw,28px)', fontWeight: 800, color: '#fff', margin: '0 0 6px', letterSpacing: '-0.02em' }}>
             Admin Portal
           </h1>

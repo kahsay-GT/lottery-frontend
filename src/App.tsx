@@ -11,8 +11,6 @@ import { RegisterPage }   from './pages/auth/Register'
 // Public
 import { HomePage }               from './pages/public/Home'
 import { PricingPage }            from './pages/public/Pricing'
-import { PublicLotteries }        from './pages/public/Lotteries'
-import { LotteryDetail }          from './pages/public/LotteryDetail'
 import { TrackPayment }           from './pages/public/TrackPayment'
 import { OperatorLotteriesPage }  from './pages/public/OperatorLotteries'
 import { OperatorLotteryDetail }  from './pages/public/OperatorLotteryDetail'
@@ -101,8 +99,6 @@ export default function App() {
         {/* ── Public ──────────────────────────────────────────────── */}
         <Route path="/"          element={<HomePage />} />
         <Route path="/pricing"   element={<PricingPage />} />
-        <Route path="/lotteries" element={<PublicLotteries />} />
-        <Route path="/lotteries/:slug" element={<LotteryDetail />} />
         <Route path="/track"     element={<TrackPayment />} />
         <Route path="/owners"    element={<LotteryOwners />} />
 

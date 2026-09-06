@@ -33,7 +33,27 @@ export const daysLeft = (d: string | Date | null | undefined): number => {
   return Math.max(0, Math.ceil((dt.getTime() - Date.now()) / 86_400_000))
 }
 
+/** Copy text to clipboard — works on mobile (HTTP) via execCommand fallback */
+export const copyToClipboard = async (text: string): Promise<void> => {
+  if (navigator.clipboard && window.isSecureContext) {
+    await navigator.clipboard.writeText(text)
+  } else {
+    const el = document.createElement('textarea')
+    el.value = text
+    el.setAttribute('readonly', '')
+    el.style.cssText = 'position:fixed;top:-9999px;left:-9999px;opacity:0'
+    document.body.appendChild(el)
+    el.focus()
+    el.select()
+    el.setSelectionRange(0, el.value.length)
+    document.execCommand('copy')
+    document.body.removeChild(el)
+  }
+}
+
 export const uid = () => Math.random().toString(36).slice(2) + Date.now().toString(36)
+
+
 
 /**
  * Returns the raw fill percentage (0–100) for a progress bar.

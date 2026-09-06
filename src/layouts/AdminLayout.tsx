@@ -5,6 +5,7 @@ import {
   Settings, LogOut, ChevronLeft, ChevronRight, Package, Tag,
   Menu, X, CreditCard, ChevronDown, Shield, FileText,
 } from 'lucide-react'
+import { Logo } from '../components/ui/Logo'
 import { useAdminAuth } from '../store/auth'
 import { authApi } from '../lib/api'
 import { toast } from 'sonner'
@@ -221,13 +222,7 @@ export function AdminLayout() {
           borderBottom: '1px solid var(--border)', flexShrink: 0,
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{
-              width: 30, height: 30, borderRadius: 8,
-              background: 'linear-gradient(135deg,#4f46e5,#6366f1)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}>
-              <Ticket className="w-4 h-4 text-white" />
-            </div>
+            <Logo height={32} />
             <div>
               <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>Lottery SaaS</p>
               <p style={{ fontSize: 10.5, color: 'var(--text-muted)', margin: 0 }}>Super Admin</p>
@@ -261,13 +256,7 @@ export function AdminLayout() {
           {!collapsed ? (
             <>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
-                <div style={{
-                  width: 30, height: 30, borderRadius: 8,
-                  background: 'linear-gradient(135deg,#4f46e5,#6366f1)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                }}>
-                  <Ticket className="w-4 h-4 text-white" />
-                </div>
+                <Logo height={32} style={{ flexShrink: 0 }} />
                 <div style={{ minWidth: 0 }}>
                   <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                     Lottery SaaS
@@ -280,13 +269,7 @@ export function AdminLayout() {
               </button>
             </>
           ) : (
-            <div style={{
-              width: 30, height: 30, borderRadius: 8,
-              background: 'linear-gradient(135deg,#4f46e5,#6366f1)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto',
-            }}>
-              <Ticket className="w-4 h-4 text-white" />
-            </div>
+            <Logo height={32} style={{ margin: '0 auto' }} />
           )}
         </div>
 

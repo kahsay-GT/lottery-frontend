@@ -187,7 +187,7 @@ export function DetailSlider({ images, banner, alt = 'Lottery' }: DetailSliderPr
           key={img.id}
           src={resolveUrl(img.url)}
           alt={`${alt} ${i + 1}`}
-          fetchPriority={i === 0 ? 'high' : 'low'}
+          fetchpriority={i === 0 ? 'high' : 'low'}
           loading={i === 0 ? 'eager' : 'lazy'}
           decoding={i === 0 ? 'sync' : 'async'}
           style={{

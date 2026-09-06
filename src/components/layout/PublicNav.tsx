@@ -3,6 +3,7 @@ import { Link, NavLink, useLocation } from 'react-router-dom'
 import { Ticket, Menu, X, CreditCard, Tag, Home } from 'lucide-react'
 import { useLang } from '../../context/LangContext'
 import { ThemeToggle } from '../../context/ThemeContext'
+import { Logo } from '../ui/Logo'
 
 // ─── Language Switcher ────────────────────────────────────────────────────────
 function LangSwitcher() {
@@ -189,20 +190,9 @@ export function PublicNav() {
           {/* Logo */}
           <Link
             to="/"
-            style={{ display: 'flex', alignItems: 'center', gap: 7, textDecoration: 'none', flexShrink: 0 }}
+            style={{ display: 'flex', alignItems: 'center', textDecoration: 'none', flexShrink: 0 }}
           >
-            <div style={{
-              width: 28, height: 28, borderRadius: 8,
-              background: 'linear-gradient(135deg,#4f46e5,#7c3aed)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              boxShadow: '0 3px 10px rgba(99,102,241,0.4)',
-              flexShrink: 0,
-            }}>
-              <Ticket style={{ width: 13, height: 13, color: '#fff' }} />
-            </div>
-            <span style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.02em', whiteSpace: 'nowrap' }}>
-            ዕድለኛ
-            </span>
+            <Logo height={40} />
           </Link>
 
           {/* Desktop centre nav */}

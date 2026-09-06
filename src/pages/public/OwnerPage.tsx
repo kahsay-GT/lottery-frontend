@@ -238,7 +238,7 @@ export function OwnerPage() {
           <Ticket style={{width:48,height:48,color:'#374151',margin:'0 auto 16px'}}/>
           <h2 style={{fontSize:22,fontWeight:700,color:'#fff',margin:'0 0 8px'}}>{t('ownerPage','operatorNotFound')}</h2>
           <p style={{color:'#6b7280',marginBottom:24}}>{t('ownerPage','noOperatorMsg').replace('{u}',username??'')}</p>
-          <Link to="/lotteries" className="btn-primary">{t('ownerPage','browseAll')}</Link>
+          <Link to="/owners" className="btn-primary">{t('ownerPage','browseAll')}</Link>
         </div>
       </div>
     </div>

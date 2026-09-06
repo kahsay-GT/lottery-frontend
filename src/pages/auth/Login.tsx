@@ -4,11 +4,12 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useNavigate, Link } from 'react-router-dom'
 import { toast } from 'sonner'
-import { Eye, EyeOff, Ticket, ArrowRight, Phone } from 'lucide-react'
+import { Eye, EyeOff, ArrowRight, Phone } from 'lucide-react'
 import { authApi, getErr } from '../../lib/api'
 import { useClientAuth, useBuyerAuth, useStaffAuth } from '../../store/auth'
 import { Spinner } from '../../components/ui/Spinner'
 import { PublicNav } from '../../components/layout/PublicNav'
+import { Logo } from '../../components/ui/Logo'
 
 // Accepts: email  OR  phone (with/without country code, spaces, dashes)
 const identifierSchema = z
@@ -97,7 +98,7 @@ export function LoginPage() {
 
           {/* Logo + heading */}
           <div style={{ textAlign: 'center' }}>
-            
+            <Logo height={80} style={{ margin: '0 auto 16px' }} />
             <h1 style={{ fontSize: 'clamp(22px,6vw,28px)', fontWeight: 800, color: '#fff', margin: '0 0 6px', letterSpacing: '-0.02em' }}>
               Sign In
             </h1>

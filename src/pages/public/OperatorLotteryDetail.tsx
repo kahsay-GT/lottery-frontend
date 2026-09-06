@@ -16,7 +16,7 @@ import {
   Shuffle, ListChecks, Search, X,
 } from 'lucide-react'
 import { publicApi, ticketsApi, paymentsApi, drawsApi, clientsApi } from '../../lib/api'
-import { fmt$, fmtDate, daysLeft, uid, soldPct, fmtPct } from '../../lib/utils'
+import { fmt$, fmtDate, daysLeft, uid, soldPct, fmtPct, copyToClipboard } from '../../lib/utils'
 import { Spinner } from '../../components/ui/Spinner'
 import { StatusBadge } from '../../components/ui/Badge'
 import { PublicNav } from '../../components/layout/PublicNav'
@@ -415,7 +415,7 @@ export function OperatorLotteryDetail() {
   const total       = qty * ticketPrice
 
   const copyRef = useCallback(() => {
-    navigator.clipboard.writeText(refCode)
+    copyToClipboard(refCode)
     setCopied(true); setTimeout(() => setCopied(false), 2000)
   }, [refCode])
 
@@ -809,7 +809,7 @@ export function OperatorLotteryDetail() {
                         <p style={{ fontSize: 13, color: '#e2e4ea', fontWeight: 600, margin: '2px 0 4px' }}>{primaryBank.accountName as string}</p>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
                           <p style={{ fontSize: 14, color: '#818cf8', fontFamily: 'monospace', fontWeight: 700, margin: 0 }}>{primaryBank.accountNumber as string}</p>
-                          <button onClick={() => { navigator.clipboard.writeText(primaryBank.accountNumber as string); toast.success('Copied!') }}
+                          <button onClick={() => { copyToClipboard(primaryBank.accountNumber as string); toast.success('Copied!') }}
                             style={{ padding: '4px 8px', borderRadius: 7, background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.2)', cursor: 'pointer', color: '#818cf8', display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0 }}>
                             <Copy style={{ width: 11, height: 11, display: 'block' }} />
                           </button>
